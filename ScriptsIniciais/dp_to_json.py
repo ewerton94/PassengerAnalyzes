@@ -135,17 +135,19 @@ def create_json_departures(files, III):
 
 
 
-folder_selected = 'DP'
+folder_selected = '../ArquivosEntrada/TV'
 
 print(listdir(folder_selected))
 final = []
 for folder in listdir(folder_selected):
+    if folder.endswith('.md'):
+        continue
     files = [folder_selected  + '/' + folder + '/' + f for f in listdir(folder_selected  + '/' + folder) if f.startswith('TempoViagem')]
     df = create_json_departures(files, ' - ' + folder)
     print(df)
     final.append(df)
     print('\n\n\n\n\n\n\n\n\n\n>>>>>>>>>>>>>>>')
 final = pd.concat(final, ignore_index=True)
-final.to_pickle('departures total sem dinheiro.zip', compression='zip')
-final.to_excel('departures total sem dinheiro.xlsx')
+final.to_pickle('../Resultados/departures total.zip', compression='zip')
+#final.to_excel('departures total.xlsx')
 

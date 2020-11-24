@@ -14,7 +14,7 @@ import json
 import PySimpleGUI as sg
 
 
-prefix = ' sem dinheiro'
+prefix = ''
 
 
 
@@ -216,13 +216,13 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
             #df_final = reduce_memory(df_final)
             #print(df_final.info())
             #df_final.to_csv('aa.csv')
-            df_final.to_pickle('df_departures_row'+ prefix + '.zip', compression='zip')
+            df_final.to_pickle('../Resultados/df_departures_row'+ prefix + '.zip', compression='zip')
             df_stops = pd.DataFrame(STOPS_DICT.values(), index =STOPS_DICT.keys())
-            df_stops.to_pickle('stops '+ prefix + '.zip', compression='zip')
+            df_stops.to_pickle('../Resultados/stops '+ prefix + '.zip', compression='zip')
             print('\bCriado Partidas brutas')
         else:
             df_final = df_row
-            df_stops = pd.read_pickle('stops '+ prefix + '.zip', compression='zip')
+            df_stops = pd.read_pickle('../Resultados/stops '+ prefix + '.zip', compression='zip')
             df_stops['LISTA'] = df_stops.apply(list, axis=1)
             STOPS_DICT = df_stops['LISTA'].to_dict()
             for key in STOPS_DICT:
@@ -232,7 +232,7 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
         DICT_DP = {}
         print('Iniciou')
         df_final = df_final.copy().drop_duplicates(subset=['data_chegada', 'car', 'line'])
-        print(df_final.columns)
+        #print(df_final.columns)
         
         #df_final = df_final[df_final['line'].str.startswith('4006')]
         #df_base = df_base[df_base['number_line']=='4006']
@@ -251,9 +251,9 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
         new_dfs = []
         df_base= None
         #print(df_final['line'].str.split(' - ').to_list())
-        print(df_final['line'])
-        print(df_final['line'].unique())
-        print(df_final['line'].str.split(' - ', expand = True))
+        #print(df_final['line'])
+        #print(df_final['line'].unique())
+        #print(df_final['line'].str.split(' - ', expand = True))
         df_nome_linha = df_final['line'].str.split(' - ', expand = True)
         try:
             df_nome_linha.loc[~df_nome_linha[2].isna(), 1] = df_nome_linha.loc[~df_nome_linha[2].isna(), 1].astype(str) + ' - ' + df_nome_linha.loc[~df_nome_linha[2].isna(), 2].astype(str)
@@ -262,13 +262,13 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
             df_nome_linha.loc[~df_nome_linha[2].isna(), 1] = df_nome_linha.loc[~df_nome_linha[2].isna(), 1].astype(str) + ' - ' + df_nome_linha.loc[~df_nome_linha[2].isna(), 2].astype(str)
         df_final[['number_line', 'line']] = df_nome_linha[[0, 1]]
         df_nome_linha = None
-        print(df_final)
+        #print(df_final)
 
         print('Percorrendo')
         total_ = len(list(DICT_DP.keys()))
         P = []
         j = 0
-        print(STOPS_DICT)
+        #print(STOPS_DICT)
         COUNT_MASTER = 0
         for car in DICT_DP.keys():
             j += 1
@@ -427,10 +427,10 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
         
         try:
             df_final = pd.concat(new_dfs, ignore_index=True)
-            print(df_final)
+            #print(df_final)
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('passagem por ponto'+ prefix + '.zip', compression='zip')
+            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + '.zip', compression='zip')
             df_final.to_excel('passagem por ponto'+ prefix + '.xlsx')
             print('Criado Passagem por ponto com base no tempo de viagem')
         except:
@@ -438,25 +438,25 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
             df_final = pd.concat(new_dfs[:int(COUNT_MASTER/4)], ignore_index=True)
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('passagem por ponto'+ prefix + ' 1.zip', compression='zip')
+            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + ' 1.zip', compression='zip')
             print('1 foi')
             df_final = pd.concat(new_dfs[int(COUNT_MASTER/4): int(COUNT_MASTER/2)], ignore_index=True)
             
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('passagem por ponto'+ prefix + ' 2.zip', compression='zip')
+            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + ' 2.zip', compression='zip')
             print('2 foi')
 
             df_final = pd.concat(new_dfs[int(COUNT_MASTER/2):int(COUNT_MASTER/2) + int(COUNT_MASTER/4)], ignore_index=True)
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('passagem por ponto'+ prefix + ' 3.zip', compression='zip')
+            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + ' 3.zip', compression='zip')
             print('3 foi')
 
             df_final = pd.concat(new_dfs[int(COUNT_MASTER/2) + int(COUNT_MASTER/4):], ignore_index=True)
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('passagem por ponto'+ prefix + ' 4.zip', compression='zip')
+            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + ' 4.zip', compression='zip')
             print('4 foi')
 
     else:
@@ -474,12 +474,11 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
     print('Criando passagem por ponto')
 
 
-    df_final.to_pickle('passagem por ponto final'+ prefix + '.zip', compression='zip')
+    df_final.to_pickle('../Resultados/passagem por ponto final'+ prefix + '.zip', compression='zip')
     #df_final.to_excel('passagem por ponto.xlsx')
     
-    print(df_final.head())
+    #print(df_final.head())
     print('Criado passagem por ponto')
-    #errocarai
     '''
     dfs = []
     for atendimento, df_at in df_final.groupby('atendimento'):
@@ -560,14 +559,14 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
     del df_final['delta_order']
     del df_final['delta_order_2']
     del df_final['delta_time']
-    df_final.to_pickle('passagem por ponto.zip', compression='zip')
+    df_final.to_pickle('../Resultados/passagem por ponto.zip', compression='zip')
     df_final.to_excel('passagem por ponto.xlsx')
     '''
     return ''
 
 #sg.ChangeLookAndFeel('GreenTan')
 
-dp_geral = pd.read_pickle('departures total'+ prefix + '.zip', compression='zip')
+dp_geral = pd.read_pickle('../Resultados/departures total'+ prefix + '.zip', compression='zip')
 
 dp_errors = dp_geral[dp_geral['fulfilled_duration'].isna()]
 dp_geral = dp_geral[~dp_geral['fulfilled_duration'].isna()]
@@ -580,7 +579,7 @@ print(dp_geral['expected_date_time'])
 
 
 try:
-    df_row = pd.read_pickle('df_departures_row'+ prefix + '.zip', compression='zip')
+    df_row = pd.read_pickle('../Resultados/df_departures_row'+ prefix + '.zip', compression='zip')
     files = []
 except:
     df_row = None
@@ -603,12 +602,12 @@ except:
     )
     event, values = window.Read()
     '''
-    folder_selected = 'PPP'
+    folder_selected = '../ArquivosEntrada/TPP'
     #root = Tk()
     #root.withdraw()
     #folder_selected = filedialog.askdirectory()
     print('\n\nPasta selecionada!\n\nVocê selecionou a pasta:', folder_selected,'\n\n')
-    print(listdir(folder_selected))
+    #print(listdir(folder_selected))
 
     files = [folder_selected + '/' + f for f in listdir(folder_selected) if f.startswith('TempoPermanenciaPonto')]
 
@@ -616,7 +615,7 @@ except:
 
 
 try:
-    df_departures_first = pd.read_pickle('df_departures_first'+ prefix + '.zip', compression='zip')
+    df_departures_first = pd.read_pickle('../Resultados/df_departures_first'+ prefix + '.zip', compression='zip')
     files = None
 except:
     df_departures_first = None
@@ -634,18 +633,18 @@ dp_geral = fix_date(dp_geral, 'expected_date_time')
 #print(dp_errors)
 
 
-with open('STOPS.json') as json_data:
+with open('../Resultados/STOPS.json') as json_data:
     STOPS_DICT = json.load(json_data)
     
 dp_geral.reset_index(inplace=True)
 df_base=dp_geral
 dp_geral = None
 create_json_ppp(files, df_row, df_departures_first)
-print(STOPS_DICT)
-with open('stops_by_line.json', 'w') as json_data:
+#print(STOPS_DICT)
+with open('../Resultados/stops_by_line.json', 'w') as json_data:
     json.dump(DIC_PP, json_data)
 
-print('\n\n\n\n\n\n\n\n\n\n>>>>>>>>>>>>>>>')
-erro
+print('\n\n\n\n\n\n\n\n\n\n>>>>>>>>>>>>>>>\n\nFinalizado Tempo por Ponto')
+
 #df = pd.read_json('departures.json')
 #print(df[df['fulfilled_duration'].isna()])
