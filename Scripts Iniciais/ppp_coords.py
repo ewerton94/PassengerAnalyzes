@@ -545,7 +545,10 @@ df['cidade'] = df2[2].apply(get_cidade)
 #df['latlon']
 import numpy as np
 import googlemaps
-gmaps = googlemaps.Client(key='AIzaSyDfxYm2U4mM7OkNSsgOelcwFDX59sI4YUc')
+with open('google.txt', 'r') as file:
+    key = file.readline().strip()
+print(key)
+gmaps = googlemaps.Client(key=key)
 import json
 with open('AD.json', encoding='utf-8') as fh:
     DIC_AD = json.loads(fh.read().replace("'", '"'))
