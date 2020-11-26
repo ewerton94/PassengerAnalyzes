@@ -9,6 +9,7 @@ Esta é a estrutura do projeto:
   │   |── TPP (Tempo Por Ponto)
       └── TV (Tempo de Viagem)
   ├── Resultados
+  │   |── PassageirosPorPonto
   ├── Scripts para Baixar dados
   |── SistemaWeb (backend)
   └── SistemaWeb (frontend)
@@ -22,3 +23,4 @@ Esta é a estrutura do projeto:
 
 ## Scripts Iniciais
 
+É necessário rodar o arquivo `main.py`, em seguida o arquivo `open_mrc_detail.py` e, finalmente o arquivo `consolidate_mrc_detail.py`.
