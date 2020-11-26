@@ -2,9 +2,8 @@
 
 Este é um projeto criado como Trabalho de Conclusão de Curso de Engenharia Civil da Universidade Federal de Alagoas.
 Esta é a estrutura do projeto:
-```shell
-  $ tree
-  .
+
+  
   ├── ArquivosEntrada
   │   |── RC (Report Center)
   │   |── TPP (Tempo Por Ponto)
@@ -14,7 +13,7 @@ Esta é a estrutura do projeto:
   |── SistemaWeb (backend)
   └── SistemaWeb (frontend)
       
-```
+
 
 ## Arquivos de entrada:
 
