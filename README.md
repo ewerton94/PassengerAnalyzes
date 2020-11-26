@@ -2,7 +2,19 @@
 
 Este é um projeto criado como Trabalho de Conclusão de Curso de Engenharia Civil da Universidade Federal de Alagoas.
 Esta é a estrutura do projeto:
-
+```shell
+  $ tree
+  .
+  ├── ArquivosEntrada
+  │   |── RC (Report Center)
+  │   |── TPP (Tempo Por Ponto)
+      └── TV (Tempo de Viagem)
+  ├── Resultados
+  ├── Scripts para Baixar dados
+  |── SistemaWeb (backend)
+  └── SistemaWeb (frontend)
+      
+```
 
 ## Arquivos de entrada:
 
