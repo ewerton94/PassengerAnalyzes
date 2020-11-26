@@ -44,5 +44,5 @@ class ReadThread(threading.Thread):
         read_file(self.file)
         
         
-for file in os.listdir('files'):
-    ReadThread('files/'+file).start()
+for file in os.listdir('../ArquivosEntrada/RC'):
+    ReadThread('../ArquivosEntrada/RC/'+file).start()

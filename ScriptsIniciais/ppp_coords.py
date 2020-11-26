@@ -12,7 +12,7 @@ import json
 
 
 
-prefix = ' sem dinheiro'
+prefix = ''
 
 
 
@@ -488,7 +488,7 @@ def create_json_ppp(files, df_base, df_row=None, df_first_work=None):
 
 #sg.ChangeLookAndFeel('GreenTan')
 
-dp_geral = pd.read_pickle('departures total'+ prefix + '.zip', compression='zip')
+dp_geral = pd.read_pickle('../Resultados/departures total'+ prefix + '.zip', compression='zip')
 
 dp_errors = dp_geral[dp_geral['fulfilled_duration'].isna()]
 dp_geral = dp_geral[~dp_geral['fulfilled_duration'].isna()]
@@ -527,7 +527,7 @@ def get_cidade(x):
     except:
         return ''
 
-df_row = pd.read_pickle('df_departures_row'+ prefix + '.zip', compression='zip')
+df_row = pd.read_pickle('../Resultados/df_departures_row'+ prefix + '.zip', compression='zip')
 print(df_row.head())
 print(df_row.columns)
 cols = ['company', 'line', 'atendimento', 'sentido', 'stop_id', 'adress', 'ordem_ponto']

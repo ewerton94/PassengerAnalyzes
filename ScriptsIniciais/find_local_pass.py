@@ -57,11 +57,11 @@ s='sem dinheiro'
 company = 'sfra'
 print('Antes do try')
 try:
-        passa = pd.read_pickle('passageiros e Pontos ida.zip', compression='zip')
-        departures = pd.read_pickle('passagem por ponto %s.zip'%s, compression='zip')
+        passa = pd.read_pickle('../Resultados/passageiros e Pontos ida.zip', compression='zip')
+        departures = pd.read_pickle('../Resultados/passagem por ponto.zip'%s, compression='zip')
         print()
 except:
-        departures = pd.read_pickle('passagem por ponto sem dinheiro.zip', compression='zip')
+        departures = pd.read_pickle('../Resultados/passagem por ponto.zip', compression='zip')
         departures = fix_date(departures, 'data_saida')
         departures = fix_date(departures, 'data_chegada')
         departures = fix_date(departures, 'HORA PARTIDA')
@@ -81,7 +81,7 @@ except:
         departures.loc[departures['number_line'].astype(int) == 7151, 'number_line'] = 715
         
         #passa = pd.read_excel('ppp/movimento_linha_716_160519.xls', sheet_name=None)
-        passa = pd.read_pickle('passageiros.zip', compression='zip')
+        passa = pd.read_pickle('../Resultados/passageiros.zip', compression='zip')
         print(passa['SITUACAO'] == 'Ok')
         passa = passa[passa['SITUACAO'] == 'Ok']
         print(passa['SITUACAO'])
@@ -109,7 +109,7 @@ except:
 
         #print(passa)
         
-        carros_com_erro_DICT = {8563: 3563, 7331: 2114, 7371: 2118, 7029: 2902}
+        carros_com_erro_DICT = {8563: 3563, 7331: 2114, 7029: 2902}
         passa.loc[:, 'CARRO'] = passa.loc[:, 'CARRO'].apply(lambda x: carros_com_erro_DICT.get(int(x), int(x)))
 
         for linha in linhas:
@@ -183,11 +183,14 @@ except:
                 
                 passa1['via'] = ''
                 passa1['via'] = np.vectorize(get_via_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
-                passa1[passa1['station'] == 'erro'].to_pickle('RESULTS\\passageiros com erro '+ str(linha) +'.zip', compression='zip')
-                passa1[passa1['station'] == 'erro'].to_excel('RESULTS\\passageiros com erro '+ str(linha) +'.xlsx')
-                passa1 = passa1[passa1['station'] != 'erro']
-                passa1.to_pickle('RESULTS\\passageiros e Pontos sem erro '+ str(linha) +'.zip', compression='zip')
-                passa1.to_excel('RESULTS\\passageiros '+ str(linha) +'.xlsx')
+                passa1[passa1 == 'erro'] = np.nan
+
+                #passa1[passa1['station'] == 'erro'].to_pickle('../Resultados/PassageirosPorPonto/passageiros com erro '+ str(linha) +'.zip', compression='zip')
+                #passa1[passa1['station'] == 'erro'].to_excel('../Resultados/PassageirosPorPonto/passageiros com erro '+ str(linha) +'.xlsx')
+                #passa1 = passa1[passa1['station'] != 'erro']
+                #passa1.to_pickle('../Resultados/PassageirosPorPonto/passageiros e Pontos sem erro '+ str(linha) +'.zip', compression='zip')
+                passa1.to_excel('../Resultados/PassageirosPorPonto/passageiros '+ str(linha) +'.xlsx')
+                passa1.to_pickle('../Resultados/PassageirosPorPonto/passageiros_pontos '+ str(linha) +'.zip', compression='zip')
                 
         print('*****************************\nCarros com erro:\n- ', '\n- '.join(list(set([' - '.join(e) for e in carros_com_erro]))), sep='')
         

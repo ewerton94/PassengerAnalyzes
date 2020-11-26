@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 
-df = pd.read_pickle('PONTOS LOC sem dinheiro.zip', compression='zip')
+df = pd.read_pickle('PONTOS LOC.zip', compression='zip')
 
 
 df.loc[df['latlon']=='None', 'latlon'] = np.nan
