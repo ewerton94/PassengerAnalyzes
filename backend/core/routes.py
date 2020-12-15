@@ -10,5 +10,5 @@ router = DefaultRouter()
 
 router.register(r'empresas', viewsets.EmpresaViewSet)
 #router.register(r'paradas', viewsets.ParadaViewSet)
-#router.register(r'linhas', viewsets.LinhaViewSet)
+router.register(r'linhas', viewsets.LinhaViewSet)
 #router.register(r'viagens', viewsets.ViagemViewSet)

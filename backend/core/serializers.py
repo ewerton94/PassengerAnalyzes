@@ -17,4 +17,4 @@ class LinhaSerializer(serializers.ModelSerializer):
     #fim = ParadaSerializer(many=False, read_only=True)
     class Meta:
         model = Linha
-        fields = ["numero", "empresa"]
+        fields = ["numero", "empresa", 'nome']
