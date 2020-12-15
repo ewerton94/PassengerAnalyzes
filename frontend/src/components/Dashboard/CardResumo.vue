@@ -9,10 +9,18 @@
           <q-icon :name="iconName" color="white" size="24px"></q-icon>
         </q-item-section>
         <q-item-section class="q-pa-md q-ml-none text-white">
-          <q-item-label class="text-white text-h6 text-weight-bolder"
-            >{{ title }}</q-item-label
+          <q-item-label v-if="!skeleton" class="text-white text-h6 text-weight-bolder"
+            >{{ title }}
+            </q-item-label
           >
-          <q-item-label>{{ subtitle }}</q-item-label>
+          <q-item-label v-else class="text-white text-h6 text-weight-bolder"
+            >
+
+            <q-skeleton type="text" />
+            </q-item-label
+          >
+          <q-item-label v-if="!skeleton">{{ subtitle }}</q-item-label>
+          <q-item-label v-else> <q-skeleton type="text" /></q-item-label>
         </q-item-section>
       </q-item>
     </div>
@@ -32,7 +40,8 @@ export default {
     'iconColor',
     'itemColor',
     'title',
-    'subtitle'
+    'subtitle',
+    'skeleton'
   ]
 }
 </script>
