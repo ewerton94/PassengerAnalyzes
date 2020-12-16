@@ -23,14 +23,11 @@ class DadosPorDiaDaSemana(BaseData):
 
     def calcular(self):
         df = self.get_df()
-        print(df)
         df['Dia da Semana'] = pd.to_datetime(df['horario']).dt.dayofweek.apply(lambda x: DIAS[x])
         df = df.groupby('Dia da Semana').count()
         df = df[['id',]]
         df.columns = ['Passageiros']
         df = self.ordenar_index(df, lambda x: DIAS_ORDEM.index(x))
-
-        print(df)
         return self.grafico_de_barras(df)
 
         print(df)
@@ -39,7 +36,6 @@ class DadosPorDiaDaSemana(BaseData):
         return df.sort_values('sort_param').drop('sort_param', 1)
 
     def grafico_de_barras(self, df):
-        xaxis = df.index
         series = []
         for col in df.columns:
             series.append({
@@ -47,13 +43,78 @@ class DadosPorDiaDaSemana(BaseData):
                 'data': df[col].values
             })
         return {
-            'xaxis': {
-                'categories': xaxis
+            'chartOptions': {
+                'chart': {
+                    'id': 'vuechart-example'
+                },
+                'xaxis': {'categories': df.index}
             },
             'series': series
         } 
         
+class DadosPorHoraDoDia(BaseData):
+    
+    columns = ['id', 'horario']
 
+    def calcular(self):
+        df = self.get_df()
+        df.index = pd.to_datetime(df['horario'])
+        df = df.groupby(pd.Grouper(freq='10Min')).count()
+        df['time'] = pd.to_datetime(df.index).time
+        df = df.groupby('time').mean()
+        df = df[['id',]]
+        df.index = ('2010-01-01 '+df.index.to_series().astype(str)).apply(pd.Timestamp)
+        df.columns = ['Passageiros']
+        df = self.ordenar_index(df, lambda x: x)
+        return self.grafico_de_area(df)
+
+    def ordenar_index(self, df, key):
+        df['sort_param'] = np.vectorize(key)(df.index)
+        return df.sort_values('sort_param').drop('sort_param', 1)
+
+    def grafico_de_area(self, df):
+        series = []
+        for col in df.columns:
+            series.append({
+                'name': col,
+                'data': list(zip(df.index, df[col].values))
+            })
+        return {
+            'chartOptions': {
+                'chart': {
+                    'id': 'area-datetime',
+                    'type': 'area',
+                    'height': 350,
+                    'zoom': {
+                        'autoScaleYaxis': True
+                    }
+                },
+                'xaxis': {
+                    'labels': {
+                        'format': 'HH:mm',
+                    },
+                    
+                    'type': 'datetime',
+                },
+                'dataLabels': {
+                    'enabled': False
+                },
+                'markers': {
+                    'size': 0,
+                    'style': 'hollow',
+                },
+                'fill': {
+                    'type': 'gradient',
+                    'gradient': {
+                        'shadeIntensity': 1,
+                        'opacityFrom': 0.7,
+                        'opacityTo': 0.9,
+                        'stops': [0, 100]
+                    }
+                },
+            },
+            'series': series
+        } 
     
 
 

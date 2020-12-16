@@ -1,16 +1,16 @@
 <template>
-  <q-card class="my-card q-mt-md col-12 col-md-6">
+  <q-card class="">
     <q-card-section>
-      <div class="text-h6">Demanda de passageiros</div>
-      <div class="text-subtitle2">Por dia da semana</div>
+      <div class="text-h6">{{title}}</div>
+      <div class="text-subtitle2">{{subtitle}}</div>
     </q-card-section>
 
-    <q-card-section v-if="graficos.DadosPorDiaDaSemana && dadosObtidos" class="q-pt-none">
+    <q-card-section v-if="graficos[tipoGrafico] && dadosObtidos" class="q-pt-none">
       <apexchart
         width="100%"
-        type="bar"
-        :options="graficos.DadosPorDiaDaSemana.chartOptions"
-        :series="graficos.DadosPorDiaDaSemana.series"
+        :type="modeloGrafico"
+        :options="graficos[tipoGrafico].chartOptions"
+        :series="graficos[tipoGrafico].series"
       ></apexchart>
     </q-card-section>
     <q-card-section v-if="!dadosObtidos" class="q-pt-none">
@@ -43,11 +43,17 @@ export default {
     async start () {
       await this.obterDadosGrafico({
         linhas: this.$router.currentRoute.query.linhas,
-        tipoGrafico: 'DadosPorDiaDaSemana'
+        tipoGrafico: this.tipoGrafico
       })
       this.dadosObtidos = true
     }
-  }
+  },
+  props: [
+    'tipoGrafico',
+    'modeloGrafico',
+    'title',
+    'subtitle'
+  ]
 
 }
 </script>

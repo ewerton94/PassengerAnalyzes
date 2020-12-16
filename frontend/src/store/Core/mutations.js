@@ -16,15 +16,8 @@ const SET_INFO_LINHAS = async (state, payload) => {
   state.linha = payload
 }
 const SET_INFO_GRAFICO = async (state, payload) => {
-  state.graficos[payload.tipoGrafico] = {
-    chartOptions: {
-      chart: {
-        id: 'vuechart-example'
-      },
-      xaxis: payload.data.xaxis
-    },
-    series: payload.data.series
-  }
+  state.graficos[payload.tipoGrafico] = payload.data
+  console.log(state.graficos[payload.tipoGrafico])
 }
 
 export {

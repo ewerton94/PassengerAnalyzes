@@ -44,7 +44,26 @@
         </q-card-section>
       </q-card>
       <div class="row">
-        <PassageiroPorDia></PassageiroPorDia>
+        <div class="col-12 col-md-6 ">
+
+        <GraficoGeral
+          class="my-card   q-ma-sm"
+          tipoGrafico = "DadosPorDiaDaSemana"
+          modeloGrafico = "bar"
+          title = "Demanda de passageiros"
+          subtitle = "Dados por dia da semana"
+        ></GraficoGeral>
+        </div>
+        <div class="col-12 col-md-6 ">
+
+        <GraficoGeral
+        class="my-card  col-12 col-md-6 q-ma-sm"
+          tipoGrafico = "DadosPorHoraDoDia"
+          modeloGrafico = "area"
+          title = "Demanda de passageiros"
+          subtitle = "Dados por hora do dia"
+        ></GraficoGeral>
+        </div>
       </div>
 
       <div></div>
@@ -55,7 +74,7 @@
 
 <script>
 import CardResumo from '../components/Dashboard/CardResumo.vue'
-import PassageiroPorDia from '../components/Dashboard/PassageiroPorDia.vue'
+import GraficoGeral from '../components/Dashboard/GraficoGeral.vue'
 import { mapState, mapActions } from 'vuex'
 
 export default {
@@ -80,7 +99,7 @@ export default {
   },
   components: {
     CardResumo,
-    PassageiroPorDia
+    GraficoGeral
   }
 }
 </script>
