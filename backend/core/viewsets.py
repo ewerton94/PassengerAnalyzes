@@ -70,18 +70,45 @@ class LinhaViewSet(viewsets.ModelViewSet):
         if tipo_grafico is None:
             return Response(status=status.HTTP_201_CREATED)
         viagens = ViagemDePassageiro.objects.filter(partida__linha__numero__in=linhas)
+        viagens = self.qs_extra_filtro(viagens, request.GET)
         return Response(eval(tipo_grafico+'(viagens).calcular()'))
-
+    
+    def qs_extra_filtro(self, qs, params):
+        if 'data_inicial' in params and 'data_final' in params:
+            print(params.get('data_inicial'))
+            print(params.get('data_final'))
+            qs = qs.filter(
+                partida__horario_prevista_terminal__date__gte=params.get('data_inicial'),
+                partida__horario_prevista_terminal__date__lte=params.get('data_final')
+            )
+        if 'partida_inicial' in params and 'partida_final' in params:
+            print(params.get('partida_inicial'))
+            print(params.get('partida_final'))
+            qs = qs.filter(
+                partida__horario_prevista_terminal__time__gte=params.get('partida_inicial')+':00',
+                partida__horario_prevista_terminal__time__lte=params.get('partida_final')+':00'
+            )
+        if 'embarque_inicial' in params and 'embarque_final' in params:
+            print(params.get('embarque_inicial'))
+            print(params.get('embarque_final'))
+            qs = qs.filter(
+                horario__time__gte=params.get('embarque_inicial'),
+                horario__time__lte=params.get('embarque_final')
+            )
+        return qs
+ 
     @action(detail=False,  methods=['get',])
     def detalhar(self, request, pk=None):
         '''
         Criar uma Linha e salvar no banco.
         '''    
+        print(request.GET)
         linhas = request.GET.get('linhas')
         if linhas is None:
             return Response(status=status.HTTP_201_CREATED)
         linhas = linhas.split(',')
         viagens = ViagemDePassageiro.objects.filter(partida__linha__numero__in=linhas)
+        viagens = self.qs_extra_filtro(viagens, request.GET)
         viagens = DadosResumo(viagens).get_df()
 
         detail = {

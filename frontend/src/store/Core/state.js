@@ -2,6 +2,9 @@ export default function () {
   return {
     linhas: [],
     linha: {},
-    graficos: {}
+    graficos: {},
+    geralKey: 0,
+    extraFiltro: {},
+    detailComplete: false
   }
 }

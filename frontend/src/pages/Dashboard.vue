@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :key="geralKey">
     <q-page class="q-pa-sm">
       <q-card class="bg-transparent no-shadow no-border">
         <q-card-section class="q-pa-none">
@@ -10,7 +10,7 @@
               iconName="fas fa-bus"
               :title="linha.lote"
               :subtitle="linha.empresa"
-              :skeleton="!detailComplete"
+
             >
             </CardResumo>
             <CardResumo
@@ -19,7 +19,7 @@
               iconName="fas fa-route"
               :title="linha.numero"
               :subtitle="linha.linha"
-              :skeleton="!detailComplete"
+
             >
             </CardResumo>
             <CardResumo
@@ -28,7 +28,7 @@
               iconName="fas fa-user"
               :title="linha.passageiros"
               subtitle="Passageiros"
-              :skeleton="!detailComplete"
+
             >
             </CardResumo>
             <CardResumo
@@ -37,7 +37,7 @@
               iconName="bar_chart"
               :title="linha.viagens"
               subtitle="Viagens"
-              :skeleton="!detailComplete"
+
             >
             </CardResumo>
           </div>
@@ -75,26 +75,27 @@
 <script>
 import CardResumo from '../components/Dashboard/CardResumo.vue'
 import GraficoGeral from '../components/Dashboard/GraficoGeral.vue'
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapMutations } from 'vuex'
 
 export default {
   name: 'PageIndex',
   data: function () {
     return {
-      detailComplete: false
+
     }
   },
-  created () {
+  mounted () {
     this.getInfoLinhas()
   },
   computed: {
-    ...mapState('Core', ['linha'])
+    ...mapState('Core', ['linha', 'extraFiltro', 'geralKey', 'detailComplete'])
   },
   methods: {
     ...mapActions('Core', ['detalharLinhas']),
+    ...mapMutations('Core', ['ADD_NEW_EXTRA_FILTRO', 'SET_ENDED']),
     async getInfoLinhas () {
-      await this.detalharLinhas(this.$router.currentRoute.query.linhas)
-      this.detailComplete = true
+      await this.ADD_NEW_EXTRA_FILTRO({ newExtraFiltroKey: 'linhas', newExtraFiltroValue: this.$router.currentRoute.query.linhas })
+      await this.detalharLinhas(this.extraFiltro)
     }
   },
   components: {
