@@ -95,6 +95,12 @@ class LinhaViewSet(viewsets.ModelViewSet):
                 horario__time__gte=params.get('embarque_inicial'),
                 horario__time__lte=params.get('embarque_final')
             )
+        if 'sentido' in params:
+            sentido = params.get('sentido')
+            if sentido != 'AMBOS':
+                qs = qs.filter(partida__sentido=sentido.lower())
+
+
         return qs
  
     @action(detail=False,  methods=['get',])

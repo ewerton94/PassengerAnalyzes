@@ -104,7 +104,7 @@ class DadosPorHoraDoDia(BaseData):
         df = self.get_df()
         df.index = pd.to_datetime(df['horario'])
         df = df.groupby(pd.Grouper(freq='10Min')).count()
-        df['time'] = pd.to_datetime(df.index).time
+        df['time'] = (pd.to_datetime(df.index) + pd.Timedelta(hours=-3)).time
         df = df.groupby('time').mean()
         df = df[['id',]]
         df.index = ('2010-01-01 '+df.index.to_series().astype(str)).apply(pd.Timestamp)
@@ -155,6 +155,14 @@ class DadosPorHoraDoDia(BaseData):
                         'opacityTo': 0.9,
                         'stops': [0, 100]
                     }
+                },
+                'tooltip': {
+                    'x': {
+                        'show': True,
+                        'format': 'HH:mm',
+                      
+                    }
+                
                 },
             },
             'series': series

@@ -189,6 +189,31 @@
         </q-card-section>
       </q-card>
     </q-expansion-item>
+
+    <q-expansion-item
+      expand-separator
+      icon="fas fa-map-signs"
+      label="Sentido de viagem"
+      caption="Filtro por sentido"
+    >
+      <q-card>
+        <q-card-section>
+          <q-toolbar>
+            <q-toolbar-title style="font-weight: bold color"
+              >Sentido</q-toolbar-title
+            >
+          </q-toolbar>
+          <div class="row">
+            <q-select class="col-12" outlined v-model="filtrarSentido" :options="['IDA', 'VOLTA', 'AMBOS']">
+              <template v-slot:prepend>
+                <q-icon name="fas fa-map-signs" />
+              </template>
+            </q-select>
+
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-expansion-item>
     <q-btn label="Filtrar" align="right" flat color="primary" @click="filtrarDados"/>
   </q-list>
 </template>
@@ -204,7 +229,8 @@ export default {
       filtrarHoraInicialPartida: null,
       filtrarHoraInicialEmbarque: null,
       filtrarHoraFinalPartida: null,
-      filtrarHoraFinalEmbarque: null
+      filtrarHoraFinalEmbarque: null,
+      filtrarSentido: 'AMBOS'
     }
   },
   computed: {
@@ -227,6 +253,9 @@ export default {
       if (this.filtrarHoraInicialEmbarque && this.filtrarHoraFinalEmbarque) {
         await this.ADD_NEW_EXTRA_FILTRO({ newExtraFiltroKey: 'embarque_inicial', newExtraFiltroValue: this.filtrarHoraInicialEmbarque })
         await this.ADD_NEW_EXTRA_FILTRO({ newExtraFiltroKey: 'embarque_final', newExtraFiltroValue: this.filtrarHoraFinalEmbarque })
+      }
+      if (this.filtrarSentido) {
+        await this.ADD_NEW_EXTRA_FILTRO({ newExtraFiltroKey: 'sentido', newExtraFiltroValue: this.filtrarSentido })
       }
 
       this.ICREMENT_GERALKEY()
