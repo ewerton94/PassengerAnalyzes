@@ -51,6 +51,50 @@ class DadosPorDiaDaSemana(BaseData):
             },
             'series': series
         } 
+class BoxPlotPorTrecho(BaseData):
+
+    tipo_ponto = 'ponto_embarque__ponto__trecho__nome'
+    
+    columns = ['id', 'ponto_embarque__ponto__trecho__nome', 'partida_id']
+
+    def calcular(self):
+        df = self.get_df()
+        pontos = df[self.tipo_ponto].unique()
+        N = len(pontos)
+        c = ['hsl('+str(h)+',50%'+',50%)' for h in np.linspace(0, 360, N)]
+
+        data=[dict(
+            name=pontos[i],
+            y=df[df[self.tipo_ponto]==pontos[i]].groupby('partida_id').count()['id'].values,
+            type='box',
+            marker={
+                'color': c[i]
+            }) for i in range(int(N))]
+        layout = {
+            'xaxis': {
+                'showgrid': False,
+                'zeroline': False,
+                'tickangle': 60,
+                'showticklabels': False
+            },
+            'yaxis': {
+                'zeroline': False,
+                'gridcolor': 'white'
+            },
+            'paper_bgcolor': 'rgb(255,255,255)',
+            'plot_bgcolor': 'rgb(255,255,255)',
+            'showlegend':True
+        }
+        print({
+            'data': data,
+            'layout': layout
+        })
+        return {
+            'data': data,
+            'layout': layout
+        }
+
+    
         
 class DadosPorHoraDoDia(BaseData):
     

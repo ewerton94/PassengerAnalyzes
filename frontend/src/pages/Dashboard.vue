@@ -64,6 +64,16 @@
           subtitle = "Dados por hora do dia"
         ></GraficoGeral>
         </div>
+        <div class="col-12 col-md-12 ">
+
+        <GraficoPlotly
+        class="my-card  col-12 col-md-12 q-ma-sm"
+          tipoGrafico = "BoxPlotPorTrecho"
+          modeloGrafico = "box"
+          title = "Embarque de passageiros"
+          subtitle = "Dados por Trecho/Viagem"
+        ></GraficoPlotly>
+        </div>
       </div>
 
       <div></div>
@@ -75,6 +85,7 @@
 <script>
 import CardResumo from '../components/Dashboard/CardResumo.vue'
 import GraficoGeral from '../components/Dashboard/GraficoGeral.vue'
+import GraficoPlotly from '../components/Dashboard/GraficoPlotly.vue'
 import { mapState, mapActions, mapMutations } from 'vuex'
 
 export default {
@@ -100,7 +111,8 @@ export default {
   },
   components: {
     CardResumo,
-    GraficoGeral
+    GraficoGeral,
+    GraficoPlotly
   }
 }
 </script>
