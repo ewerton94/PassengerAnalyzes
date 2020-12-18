@@ -85,10 +85,10 @@ class BoxPlotPorTrecho(BaseData):
             'plot_bgcolor': 'rgb(255,255,255)',
             'showlegend':True
         }
-        print({
+        '''print({
             'data': data,
             'layout': layout
-        })
+        })'''
         return {
             'data': data,
             'layout': layout
