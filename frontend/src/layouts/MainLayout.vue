@@ -32,8 +32,26 @@
         >
           Essential Links
         </q-item-label>
-        <EssentialLink
-        />
+        <q-list>
+        <q-item clickable v-close-popup @click="onItemClick">
+          <q-item-section>
+            <q-item-label>Photos</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-close-popup @click="onItemClick">
+          <q-item-section>
+            <q-item-label>Videos</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-close-popup @click="onItemClick">
+          <q-item-section>
+            <q-item-label>Articles</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+
       </q-list>
     </q-drawer>
 
@@ -44,11 +62,9 @@
 </template>
 
 <script>
-import EssentialLink from 'components/EssentialLink.vue'
 
 export default {
   name: 'MainLayout',
-  components: { EssentialLink },
 
   data () {
     return {

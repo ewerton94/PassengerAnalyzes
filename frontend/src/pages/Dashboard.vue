@@ -1,7 +1,16 @@
 <template>
-  <div :key="geralKey">
+  <div >
     <q-page class="q-pa-sm">
       <q-card class="bg-transparent no-shadow no-border">
+
+        <q-card-section class="q-pa-none">
+          <Filtro/>
+        </q-card-section>
+      </q-card>
+      <div :key="geralKey">
+
+      <q-card  class="bg-transparent no-shadow no-border">
+
         <q-card-section class="q-pa-none">
           <div class="row q-col-gutter-sm">
             <CardResumo
@@ -75,6 +84,7 @@
         ></GraficoPlotly>
         </div>
       </div>
+      </div>
 
       <div></div>
     </q-page>
@@ -83,6 +93,7 @@
 </template>
 
 <script>
+import Filtro from '../components/Dashboard/Filtro.vue'
 import CardResumo from '../components/Dashboard/CardResumo.vue'
 import GraficoGeral from '../components/Dashboard/GraficoGeral.vue'
 import GraficoPlotly from '../components/Dashboard/GraficoPlotly.vue'
@@ -111,6 +122,7 @@ export default {
   },
   components: {
     CardResumo,
+    Filtro,
     GraficoGeral,
     GraficoPlotly
   }
