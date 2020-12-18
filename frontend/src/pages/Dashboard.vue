@@ -20,8 +20,7 @@
               :title="linha.lote"
               :subtitle="linha.empresa"
 
-            >
-            </CardResumo>
+            />
             <CardResumo
               itemColor="#f37169"
               iconColor="#f34636"
@@ -29,8 +28,7 @@
               :title="linha.numero"
               :subtitle="linha.linha"
 
-            >
-            </CardResumo>
+            />
             <CardResumo
               itemColor="#ea6a7f"
               iconColor="#ea4b64"
@@ -38,8 +36,7 @@
               :title="linha.passageiros"
               subtitle="Passageiros"
 
-            >
-            </CardResumo>
+            />
             <CardResumo
               itemColor="#a270b1"
               iconColor="#9f52b1"
@@ -47,8 +44,7 @@
               :title="linha.viagens"
               subtitle="Viagens"
 
-            >
-            </CardResumo>
+            />
           </div>
         </q-card-section>
       </q-card>
