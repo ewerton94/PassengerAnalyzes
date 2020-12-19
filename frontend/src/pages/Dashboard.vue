@@ -78,6 +78,13 @@
           title = "Embarque de passageiros"
           subtitle = "Dados por Trecho/Viagem"
         ></GraficoPlotly>
+        <GraficoPlotly
+        class="my-card  col-12 col-md-12 q-ma-sm"
+          tipoGrafico = "BoxPlotPorTrechoDesembarque"
+          modeloGrafico = "box"
+          title = "Desembarque de passageiros"
+          subtitle = "Dados por Trecho/Viagem"
+        ></GraficoPlotly>
         </div>
       </div>
       </div>
