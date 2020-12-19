@@ -72,6 +72,13 @@ class LinhaViewSet(viewsets.ModelViewSet):
         viagens = ViagemDePassageiro.objects.filter(partida__linha__numero__in=linhas)
         viagens = self.qs_extra_filtro(viagens, request.GET)
         return Response(eval(tipo_grafico+'(viagens).calcular()'))
+
+    @action(detail=False,  methods=['get',])
+    def calcular_desembarque(self, request, pk=None):
+        viagens = ViagemDePassageiro.objects.all()
+        CalcularDesembarque(viagens).calcular()
+        return Response('ok')
+
     
     def qs_extra_filtro(self, qs, params):
         if 'data_inicial' in params and 'data_final' in params:

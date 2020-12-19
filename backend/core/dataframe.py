@@ -17,6 +17,82 @@ class BaseData():
 
 class DadosResumo(BaseData):
     columns = ['id', 'partida_id']
+
+def get_order(dic_ordem, a, b, c, d):
+    o = dic_ordem.get((a, b, c, d), -1)
+    if d == 'volta' and o >=0:
+        o += 1000
+    return o
+from scipy.spatial.distance import cdist
+
+def closest_point(point, points):
+    """ Find closest point from a list of points. """
+    #print(len(point), len(points))
+    if len(points) > 0:
+        return points[cdist([point], points).argmin()]
+    return np.nan
+from bulk_update.helper import bulk_update
+class CalcularDesembarque(BaseData):
+    columns = ['id', 'cartao_id', 'partida_id', 'partida__sentido','horario', 'ponto_embarque__ponto__codigo', 'partida__linha_id', 'partida__atendimento', 'ponto_embarque__ponto_id']
+    names = ['id', 'cartao', 'partida', 'sentido', 'horario', 'ponto', 'linha', 'atendimento', 'ponto_id']
+
+    def calcular(self):
+        self.queryset = self.queryset.filter(calculou_ponto_desembarque=False)
+        if self.queryset.exists():
+            df = self.get_df()
+            df.columns = self.names
+            df = df.sort_values(by=['cartao', 'horario'])
+            df['data'] = df['horario'].dt.date
+            df = df[df.groupby(['cartao', 'data'])['horario'].transform('count') > 1]
+            df['next_ponto'] = df['ponto'].shift(-1)
+            df['next_ponto_id'] = df['ponto_id'].shift(-1)
+            df['next_sentido'] = df['sentido'].shift(-1)
+            df['next_partida'] = df['partida'].shift(-1)
+            df = df[df['ponto'].shift(-1) != df['ponto']]
+            df = df[df['partida'].shift(-1) != df['partida']]
+            df.loc[df['cartao'].shift(-1) != df['cartao'], ['next_ponto', 'next_ponto_id', 'next_partida', 'next_sentido']] = np.nan
+            df = df[df.groupby(['cartao', 'data'])['horario'].transform('count') > 1]
+            for cartao, df_ in  df[['cartao', 'ponto', 'next_ponto', 'next_ponto_id','sentido', 'next_sentido']].groupby('cartao'):
+                df.loc[df_.index[-1], ['next_ponto', 'next_ponto_id', 'next_sentido']] = list(df.loc[df_.index[0], ['ponto', 'ponto_id', 'sentido']].values)
+            dic_ordem = {(o.ponto_id, o.linha_id, o.atendimento, o.sentido): o.ordem for o in OrdemPontosLinha.objects.all()}
+            #print(dic_ordem.keys())
+            df['ordem'] = np.vectorize(get_order)(dic_ordem, df['ponto_id'].astype(int).values, df['linha'].values, df['atendimento'].values, df['sentido'].values)
+            df['next_ordem'] = np.vectorize(get_order)(dic_ordem, df['next_ponto_id'].astype(int).values, df['linha'].values, df['atendimento'].values, df['sentido'].values)
+            dic_pontos_ordem = {p: o for p, o in zip(df['ponto_id'], df['ordem'])}
+            dic_pontos = {p.id: (p.lat, p.lon) for p in Ponto.objects.all()}
+            dic_coordenadas = {(lat, lon, c): id  for id, lat, lon, c in PontoPorEmpresa.objects.all().values_list('id', 'ponto__lat', 'ponto__lon', 'empresa_id').distinct()}
+            #dic_coordenadas_ordem = {(p.lat, p.lon): p.id  for p in Ponto.objects.all()}
+            df_pontos = df[['ponto_id', 'ordem', 'next_ponto_id', 'next_ordem']]
+            df_pontos.loc[:, 'coordenadas']=df_pontos['ponto_id'].map(dic_pontos)
+            
+            df = df[['id', 'ordem', 'next_ponto_id', 'next_ordem']]
+            df.loc[:, 'coordenadas'] = df['next_ponto_id'].map(dic_pontos)
+            df['closest'] = [closest_point(x, list(df_pontos[df_pontos['ordem']>omin]['coordenadas'])) for x, omin in zip(df['coordenadas'], df['ordem'])]
+            df = df[~pd.isnull(df.closest)]
+            print(dic_coordenadas)
+            df['desembarque_id'] = df['closest'].apply(lambda x: dic_coordenadas[(x[0], x[1], 2)])
+            df['desembarque_ordem'] = df['desembarque_id'].map(dic_pontos_ordem)
+
+
+
+            #df2['closest'] = [closest_point(x, list(df1['point'])) for x in df2['point']]
+            #df['cartao'] = df['cartao'].astype(str).apply(lambda x: x[:6])
+            #df = df[['cartao', 'partida', 'horario', 'ponto', 'next_ponto']]
+            #df['next_cartao'] = df['cartao'].shift(-1)
+            print(df.columns)
+            print(df)
+            df = df[df.desembarque_ordem > df.ordem]
+            print(df)
+            vs = self.queryset.filter(id__in=df.id.values)
+            for v in vs:
+                v.ponto_desembarque_id = int(df.loc[df.id == v.id, 'desembarque_id'])
+            bulk_update(vs)
+            self.queryset.update(calculou_ponto_desembarque=True)
+            return True
+        else: 
+            return False
+        
+
 class DadosPorDiaDaSemana(BaseData):
     
     columns = ['id', 'horario']
@@ -51,21 +127,37 @@ class DadosPorDiaDaSemana(BaseData):
             },
             'series': series
         } 
+
+
+def get_order_trecho(ordem_ponto, x):
+    inverso = {'ida': 'volta', 'volta': 'ida'}
+    o = ordem_ponto.get((x[0], x[1]), ordem_ponto.get((x[0], inverso[x[1]]), -1))
+    if x[1] == 'volta':
+        o = o + 1000 
+    return o
+    
 class BoxPlotPorTrecho(BaseData):
 
     tipo_ponto = 'ponto_embarque__ponto__trecho__nome'
     
-    columns = ['id', 'ponto_embarque__ponto__trecho__nome', 'partida_id']
+    columns = ['id', 'ponto_embarque__ponto__trecho__nome', 'partida_id', 'ponto_embarque__ponto_id', 'partida__sentido']
 
     def calcular(self):
         df = self.get_df()
-        pontos = df[self.tipo_ponto].unique()
+        ordem_ponto = {(p, s): o for p, o, s in OrdemPontosLinha.objects.select_related().all().values_list('ponto__trecho__nome', 'ordem', 'sentido').distinct()}
+        un = df[[self.tipo_ponto, 'partida__sentido']].drop_duplicates()
+        #print(list(zip(df[self.tipo_ponto].values, df.partida__sentido.values)))
+        print('Antes', self.tipo_ponto)
+        pontos = [ee for ee in sorted(list(set(list(zip(un[self.tipo_ponto].values, un.partida__sentido.values)))), key=lambda x: get_order_trecho(ordem_ponto, x)) if not ee[0] is None]
+        print('Depois', self.tipo_ponto)
         N = len(pontos)
+        print(N, self.tipo_ponto)
+        print(N, pontos, self.tipo_ponto)
         c = ['hsl('+str(h)+',50%'+',50%)' for h in np.linspace(0, 360, N)]
 
         data=[dict(
-            name=pontos[i],
-            y=df[df[self.tipo_ponto]==pontos[i]].groupby('partida_id').count()['id'].values,
+            name=str(i+1) + ' - ' +pontos[i][0] + ' (%s)'%(pontos[i][1][0].upper()),
+            y=df[(df[self.tipo_ponto]==pontos[i][0]) & (df['partida__sentido']==pontos[i][1])].groupby('partida_id').count()['id'].values,
             type='box',
             marker={
                 'color': c[i]
@@ -95,7 +187,11 @@ class BoxPlotPorTrecho(BaseData):
         }
 
     
-        
+class BoxPlotPorTrechoDesembarque(BoxPlotPorTrecho):
+
+    tipo_ponto = 'ponto_desembarque__ponto__trecho__nome'
+    
+    columns = ['id', 'ponto_desembarque__ponto__trecho__nome', 'partida_id', 'ponto_desembarque__ponto_id', 'partida__sentido']   
 class DadosPorHoraDoDia(BaseData):
     
     columns = ['id', 'horario']
