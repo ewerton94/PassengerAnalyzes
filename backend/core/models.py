@@ -57,10 +57,12 @@ class Linha(models.Model):
     def __str__(self):
         return self.nome
 
-class OrdemTrechosLinha(models.Model):
+class OrdemPontosLinha(models.Model):
     linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='ordens_trechos')
-    trecho = models.ForeignKey(Trecho, on_delete=models.CASCADE, related_name='ordens_linhas')
+    ponto = models.ForeignKey(Ponto, on_delete=models.CASCADE, related_name='ordens_linhas')
     ordem = models.IntegerField()
+    atendimento = models.CharField(max_length=500, null=True, blank=True)
+    sentido = models.CharField(max_length=500, null=True, blank=True)
 
 class Carro(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
@@ -85,6 +87,7 @@ class ViagemDePassageiro(models.Model):
     partida = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='viagens_de_passageiros', null=True, blank=True)
     horario = models.DateTimeField(auto_now_add=False)
     integracao = models.BooleanField(default=False)
+    calculou_ponto_desembarque = models.BooleanField(default=False)
 
 class LinhaPorDiaSemana(models.Model):
     linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='por_dia_semana')
