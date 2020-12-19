@@ -1,6 +1,6 @@
 import { HTTPClient } from 'boot/axios'
 import { handleError } from 'boot/exceptions'
-// import { Notify } from 'quasar'
+import { Notify } from 'quasar'
 function serialize (obj) {
   var str = []
   for (var p in obj) { str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p])) }
@@ -52,10 +52,30 @@ const obterDadosGrafico = ({ commit }, extraFiltro) => {
       })
   })
 }
+const calcularDesembarque = ({ commit }) => {
+  return new Promise((resolve, reject) => {
+    HTTPClient.get('core/linhas/calcular_desembarque/')
+      .then(async (suc) => {
+        // console.log(suc.data)
+        // await commit('SET_INFO_GRAFICO', { data: suc.data, tipoGrafico: extraFiltro.tipo_grafico })
+        Notify.create({
+          type: 'positive',
+          message: 'Ok'
+        })
+        resolve(suc.data)
+      })
+      .catch(async (err) => {
+        err = await err
+        handleError(err)
+        reject(err)
+      })
+  })
+}
 
 export {
   listarLinhas,
   detalharLinhas,
-  obterDadosGrafico
+  obterDadosGrafico,
+  calcularDesembarque
 
 }

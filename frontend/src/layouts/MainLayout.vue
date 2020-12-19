@@ -30,26 +30,27 @@
           header
           class="text-grey-8"
         >
-          Essential Links
+          Menu
         </q-item-label>
         <q-list>
-        <q-item clickable v-close-popup @click="onItemClick">
+        <q-item clickable v-close-popup href="/">
+          <q-item-section avatar>
+          <q-icon color="primary" name="dashboard" />
+        </q-item-section>
           <q-item-section>
-            <q-item-label>Photos</q-item-label>
+            <q-item-label>Dashboard</q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable v-close-popup @click="onItemClick">
+        <q-item clickable v-close-popup @click="calcularDesembarque">
+          <q-item-section avatar>
+          <q-icon color="primary" name="fas fa-calculator" />
+        </q-item-section>
           <q-item-section>
-            <q-item-label>Videos</q-item-label>
+            <q-item-label>Calcular Desembarques</q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable v-close-popup @click="onItemClick">
-          <q-item-section>
-            <q-item-label>Articles</q-item-label>
-          </q-item-section>
-        </q-item>
       </q-list>
 
       </q-list>
@@ -62,9 +63,13 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 
 export default {
   name: 'MainLayout',
+  methods: {
+    ...mapActions('Core', ['calcularDesembarque'])
+  },
 
   data () {
     return {
