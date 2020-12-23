@@ -85,6 +85,13 @@
           title = "Desembarque de passageiros"
           subtitle = "Dados por Trecho/Viagem"
         ></GraficoPlotly>
+        <MapaCalor
+        class="my-card  col-12 col-md-12 q-ma-sm"
+          tipoGrafico = "MapaCalorEmbarque"
+          modeloGrafico = "box"
+          title = "Desembarque de passageiros"
+          subtitle = "Dados por Trecho/Viagem"
+        ></MapaCalor>
         </div>
       </div>
       </div>
@@ -100,6 +107,7 @@ import Filtro from '../components/Dashboard/Filtro.vue'
 import CardResumo from '../components/Dashboard/CardResumo.vue'
 import GraficoGeral from '../components/Dashboard/GraficoGeral.vue'
 import GraficoPlotly from '../components/Dashboard/GraficoPlotly.vue'
+import MapaCalor from '../components/Dashboard/MapaCalor.vue'
 import { mapState, mapActions, mapMutations } from 'vuex'
 
 export default {
@@ -127,7 +135,8 @@ export default {
     CardResumo,
     Filtro,
     GraficoGeral,
-    GraficoPlotly
+    GraficoPlotly,
+    MapaCalor
   }
 }
 </script>

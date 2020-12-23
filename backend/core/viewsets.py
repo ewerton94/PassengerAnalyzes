@@ -69,7 +69,7 @@ class LinhaViewSet(viewsets.ModelViewSet):
         tipo_grafico = request.GET.get('tipo_grafico')
         if tipo_grafico is None:
             return Response(status=status.HTTP_201_CREATED)
-        viagens = ViagemDePassageiro.objects.filter(partida__linha__numero__in=linhas)
+        viagens = ViagemDePassageiro.objects.filter(partida_embarque__linha__numero__in=linhas)
         viagens = self.qs_extra_filtro(viagens, request.GET)
         return Response(eval(tipo_grafico+'(viagens).calcular()'))
 
@@ -85,15 +85,15 @@ class LinhaViewSet(viewsets.ModelViewSet):
             print(params.get('data_inicial'))
             print(params.get('data_final'))
             qs = qs.filter(
-                partida__horario_prevista_terminal__date__gte=params.get('data_inicial'),
-                partida__horario_prevista_terminal__date__lte=params.get('data_final')
+                partida_embarque__horario_prevista_terminal__date__gte=params.get('data_inicial'),
+                partida_embarque__horario_prevista_terminal__date__lte=params.get('data_final')
             )
         if 'partida_inicial' in params and 'partida_final' in params:
             print(params.get('partida_inicial'))
             print(params.get('partida_final'))
             qs = qs.filter(
-                partida__horario_prevista_terminal__time__gte=params.get('partida_inicial')+':00',
-                partida__horario_prevista_terminal__time__lte=params.get('partida_final')+':00'
+                partida_embarque__horario_prevista_terminal__time__gte=params.get('partida_inicial')+':00',
+                partida_embarque__horario_prevista_terminal__time__lte=params.get('partida_final')+':00'
             )
         if 'embarque_inicial' in params and 'embarque_final' in params:
             print(params.get('embarque_inicial'))
@@ -105,7 +105,7 @@ class LinhaViewSet(viewsets.ModelViewSet):
         if 'sentido' in params:
             sentido = params.get('sentido')
             if sentido != 'AMBOS':
-                qs = qs.filter(partida__sentido=sentido.lower())
+                qs = qs.filter(partida_embarque__sentido=sentido.lower())
 
 
         return qs
@@ -120,13 +120,13 @@ class LinhaViewSet(viewsets.ModelViewSet):
         if linhas is None:
             return Response(status=status.HTTP_201_CREATED)
         linhas = linhas.split(',')
-        viagens = ViagemDePassageiro.objects.filter(partida__linha__numero__in=linhas)
+        viagens = ViagemDePassageiro.objects.filter(partida_embarque__linha__numero__in=linhas)
         viagens = self.qs_extra_filtro(viagens, request.GET)
         viagens = DadosResumo(viagens).get_df()
 
         detail = {
             'passageiros': len(viagens['id'].unique()),
-            'viagens': len(viagens['partida_id'].unique()),
+            'viagens': len(viagens['partida_embarque_id'].unique()),
             'numero': '...',
             'linha': 'Várias',
             'lote': '...',
