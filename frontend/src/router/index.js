@@ -7,7 +7,22 @@ Vue.use(VueRouter)
 
 import VueApexCharts from 'vue-apexcharts'
 Vue.use(VueApexCharts)
+try {
+  var GoogleMapsKey = require('boot/secret')
+  console.log('GoogleMapsKey Externa')
 
+  console.log(GoogleMapsKey.GoogleMapsKey)
+} catch (e) {
+  const GoogleMapsKey = { GoogleMapsKey: 'INSIRA SUA KEY' }
+  console.log('GoogleMapsKey Interna')
+  console.log(GoogleMapsKey)
+}
+
+import VueGoogleHeatmap from 'vue-google-heatmap'
+
+Vue.use(VueGoogleHeatmap, {
+  apiKey: GoogleMapsKey.GoogleMapsKey
+})
 Vue.component('apexchart', VueApexCharts)
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUserSecret } from '@fortawesome/free-solid-svg-icons'

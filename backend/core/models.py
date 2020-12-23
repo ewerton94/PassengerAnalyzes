@@ -26,7 +26,7 @@ class Ponto(models.Model):
     bairro = models.TextField(default='')
 
     def __str__(self):
-        return "%i (%.4f, %.4f)"%(self.codigo, self.lat, self.lon)
+        return "%s (%.4f, %.4f)"%(self.codigo, self.lat, self.lon)
 
 
 class Empresa(models.Model):
@@ -84,7 +84,8 @@ class ViagemDePassageiro(models.Model):
     cartao = models.ForeignKey(Cartao, on_delete=models.CASCADE, related_name='viagens_de_passageiros')
     ponto_embarque = models.ForeignKey(PontoPorEmpresa, on_delete=models.CASCADE, related_name='embarques', null=True, blank=True)
     ponto_desembarque = models.ForeignKey(PontoPorEmpresa, on_delete=models.CASCADE, related_name='desembarques', null=True, blank=True)
-    partida = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='viagens_de_passageiros', null=True, blank=True)
+    partida_embarque = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='embarque_de_passageiros', null=True, blank=True)
+    partida_desembarque = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='desembarque_de_passageiros', null=True, blank=True)
     horario = models.DateTimeField(auto_now_add=False)
     integracao = models.BooleanField(default=False)
     calculou_ponto_desembarque = models.BooleanField(default=False)
@@ -107,12 +108,14 @@ class EmbarqueDeLinhaPorTempo(models.Model):
 
 class EmbarquePorTrecho(models.Model):
     linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='por_trecho')
-    trecho = models.ForeignKey(Trecho, on_delete=models.CASCADE, related_name='viagens')
-    sentido = models.CharField(max_length=500, null=True, blank=True)
+    #trecho = models.ForeignKey(Trecho, on_delete=models.CASCADE, related_name='viagens')
+    ponto = models.ForeignKey(Ponto, on_delete=models.CASCADE, related_name='viagens', null=True, blank=True)
+    #sentido = models.CharField(max_length=500, null=True, blank=True)
+    partida = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='por_trecho', null=True, blank=True)
     faixa_horaria = models.CharField(max_length=500, null=True, blank=True)
     tempo_partida = models.TimeField()
     quantidade_total_embarque = models.FloatField()
     quantidade_total_desembarque = models.FloatField()
-    quantidade_no_veiculo_final_trecho = models.FloatField()
-    ordem_trecho = models.IntegerField()
+    quantidade_no_veiculo_pos_ponto = models.FloatField(default=0)
+    ordem_ponto = models.IntegerField(default=0)
 
