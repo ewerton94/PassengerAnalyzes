@@ -110,7 +110,7 @@ def create_viagens(df):
     dic_pontos = {p.codigo_cittamobi:p for p in PontoPorEmpresa.objects.select_related().all()}
     print(dic_pontos)
     viagens = np.vectorize(lambda linha, carro, horario, partida, cartao, ponto_embarque: ViagemDePassageiro(
-        partida=dic_partidas[(str(int(linha)), str(carro), pd.to_datetime(partida).date(), pd.to_datetime(partida).time())],
+        partida_embarque=dic_partidas[(str(int(linha)), str(carro), pd.to_datetime(partida).date(), pd.to_datetime(partida).time())],
         horario=pd.to_datetime(horario),
         ponto_embarque=dic_pontos[ponto_embarque],
         cartao=dic_cartaos[cartao],
