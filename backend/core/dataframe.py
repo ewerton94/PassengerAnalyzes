@@ -32,6 +32,8 @@ def closest_point(point, points):
         return points[cdist([point], points).argmin()]
     return np.nan
 from bulk_update.helper import bulk_update
+
+
 class CalcularDesembarque(BaseData):
     columns = ['id', 'cartao_id', 'partida_embarque_id', 'partida_embarque__sentido','horario', 'ponto_embarque__ponto__codigo', 'partida_embarque__linha_id', 'partida_embarque__atendimento', 'ponto_embarque__ponto_id']
     names = ['id', 'cartao', 'partida_embarque', 'sentido', 'horario', 'ponto', 'linha', 'atendimento', 'ponto_id']
@@ -116,6 +118,55 @@ class CalcularDesembarque(BaseData):
             #errrr
             bulk_update(vs)
             self.queryset.update(calculou_ponto_desembarque=True)
+            return True
+        else: 
+            return False
+
+class CalcularLotacaoPorTrecho(BaseData):
+    columns = ['id', 'cartao_id', 'partida_embarque_id', 'partida_embarque__sentido','horario', 'ponto_embarque__ponto__codigo', 'partida_desembarque_id', 'partida_desembarque__sentido','ponto_desembarque__ponto__codigo', 'partida_embarque__linha_id', 'partida_embarque__atendimento', 'ponto_embarque__ponto_id', 'ponto_desembarque__ponto_id']
+    names = ['id', 'cartao', 'partida_embarque', 'sentido_embarque', 'horario', 'ponto_embarque', 'partida_desembarque', 'sentido_desembarque',  'ponto_desembarque', 'linha', 'atendimento', 'ponto_embarque_id', 'ponto_desembarque_id']
+
+    def calcular(self):
+        self.queryset = self.queryset.filter(partida_desembarque__isnull=False)
+        if self.queryset.exists():
+            df = self.get_df()
+            df.columns = self.names
+            dic_ordem = {(o.ponto_id, o.linha_id, o.atendimento, o.sentido): o.ordem for o in OrdemPontosLinha.objects.all()}
+            #print(dic_ordem.keys())
+            
+            df['ordem_embarque'] = np.vectorize(get_order)(dic_ordem, df['ponto_embarque_id'].astype(int).values, df['linha'].values, df['atendimento'].values, df['sentido_embarque'].values)
+            df['ordem_desembarque'] = np.vectorize(get_order)(dic_ordem, df['ponto_desembarque_id'].astype(int).values, df['linha'].values, df['atendimento'].values, df['sentido_desembarque'].values)
+            ordens = list(df['ordem_embarque'].unique()) + list(df['ordem_desembarque'].unique())
+            df = df.sort_values(by=['cartao', 'horario'])
+            df = df.loc[df.ordem_desembarque > df.ordem_embarque, :]
+            print(df)
+            def get_trecho_ou_nao(e, d, i):
+                if e<=i<=d:
+                    return 1
+                return 0
+
+
+            #df2 = df.loc[:, ['ordem_embarque', 'ordem_desembarque']]
+            #print(ordens)
+            for ordem in sorted(ordens):
+                df.loc[:, ordem] = np.vectorize(get_trecho_ou_nao)(
+                    df.ordem_embarque.values,
+                    df.ordem_desembarque.values,
+                    ordem
+                )
+            #print(df2.columns)
+            #df.loc[:, ordens] = 0
+            #df.loc[:, df2.columns] = df2.loc[:, df2.columns]
+            df['horario'] = pd.to_datetime(df['horario'], utc=True).dt.tz_convert(None)
+
+            df.to_excel('lotacao.xlsx')
+            df3 = df.groupby(['partida_embarque']).sum()
+            df3.to_excel('lotacao_final.xlsx')
+            print(df3)
+            #pd.pivot_table(df, index=['partida_embarque'], columns=['cartao'], values=df.)
+            #print(df[df.ordem_desembarque < df.ordem_embarque])
+            #print(df[df.ordem_desembarque < df.ordem_embarque].loc[:, ['ponto_desembarque', 'atendimento', 'sentido_desembarque']])
+            
             return True
         else: 
             return False
@@ -212,10 +263,117 @@ class BoxPlotPorTrecho(BaseData):
             'plot_bgcolor': 'rgb(255,255,255)',
             'showlegend':True
         }
-        '''print({
+        
+        return {
             'data': data,
             'layout': layout
-        })'''
+        }
+
+def get_order_trecho_ida(ordem_ponto, x):
+    s = 'ida'
+    inverso = {'ida': 'volta', 'volta': 'ida'}
+
+    o = ordem_ponto.get((x, s), None)
+    if o is None:
+        s = inverso[s]
+        
+        o = ordem_ponto.get((x, s), -1)
+    if s == 'volta':
+        o = o + 1000 
+    return o
+
+def nodify(node_names):
+    # uniqe name endings
+    #ends = sorted(list(set([e[-1] for e in node_names])))
+
+    # intervals
+    steps = 2* 1/len(node_names)
+
+    # x-values for each unique name ending
+    # for input as node position
+    
+
+    # x and y values in list form
+    #x_values = [nodes_x[n[-1]] for n in node_names]
+    l = len(node_names)/2
+    #print(l)
+    l = int(l)
+    y_values = list(np.arange(0, 1, steps))
+    y_values = y_values + y_values
+    
+    x_values = ([0.0]*(l)) + ([1]*(l))
+    #print(x_values)
+
+    return x_values, y_values
+import re
+import colorsys
+
+class SankeyOD(BaseData):
+
+    tipo_ponto = 'ponto_embarque__ponto__trecho__nome'
+    
+    columns = ['id', 'ponto_embarque__ponto__trecho__nome', 'ponto_desembarque__ponto__trecho__nome', 'partida_embarque_id', 'ponto_embarque__ponto_id', 'partida_embarque__sentido']
+
+    def calcular(self):
+        df = self.get_df()
+        ordem_ponto = {(p, s): o for p, o, s in OrdemPontosLinha.objects.select_related().all().values_list('ponto__trecho__nome', 'ordem', 'sentido').distinct()}
+        #print(df[self.tipo_ponto])
+        un = df[self.tipo_ponto].unique()
+        #print(un)
+        #od = df[['ponto_embarque__ponto__trecho__nome', 'ponto_desembarque__ponto__trecho__nome']].drop_duplicates()
+        #print(list(zip(df[self.tipo_ponto].values, df.partida_embarque__sentido.values)))
+        #print('Antes', self.tipo_ponto)
+        #print('\n\n\n\n>>>>>>>>>>>>\n\n', 'list(un.values)')
+        #print(list(un))
+        pontos = list([ee for ee in sorted(list(un), key=lambda x: get_order_trecho_ida(ordem_ponto, x)) if not ee is None])
+        #print(pontos)
+        df.loc[:, 'quantidade'] = 1
+        df = df.groupby(['ponto_embarque__ponto__trecho__nome', 'ponto_desembarque__ponto__trecho__nome']).count().reset_index()
+        #print('DDDD')
+        df['O'] = df['ponto_embarque__ponto__trecho__nome'] + ' (O)'
+        df['D'] = df['ponto_desembarque__ponto__trecho__nome']+ ' (D)'
+        df['ordemO'] = df['ponto_embarque__ponto__trecho__nome'].apply(lambda x: get_order_trecho_ida(ordem_ponto, x))
+        df['ordemD'] = df['ponto_desembarque__ponto__trecho__nome'].apply(lambda x: get_order_trecho_ida(ordem_ponto, x))
+        df = df.sort_values(by=['ordemO'])
+        #print('Depois', self.tipo_ponto)
+        N = len(pontos)
+        #df['D'] = df['D'] + N
+        nomes_duplicados = [p for p in  pontos]
+        nomes_duplicados = nomes_duplicados + nomes_duplicados
+        #print(N, self.tipo_ponto)
+        #print(N, pontos, self.tipo_ponto)
+        #c = ['hsl('+str(h)+',50%'+',50%)' ]
+        rgbs = [colorsys.hls_to_rgb(int(h)/360,.5,.5) for h in np.linspace(0, 360, N)]
+        c = ['#%02x%02x%02x'%(round(rgb[0]*255),round(rgb[1]*255),round(rgb[2]*255)) for rgb in rgbs]
+        df['cor'] = df['ponto_embarque__ponto__trecho__nome'].apply(lambda x: c[pontos.index(x)])
+        df = df.sort_values(by=['ordemO', 'ordemD'])
+        #print(df)
+        cores_duplicadas = c + c
+
+        #print('\n\n______________nomes_duplicados')
+        #print(nomes_duplicados)
+        #print('\n\ncores_duplicadas')
+        #print(cores_duplicadas)
+
+        data = [['De', 'Para', 'Peso']] + list(zip(df.O.values, df.D.values, df.quantidade.values))
+        
+        #print('\n\n\n\n---------\n\ndata\n\n---------\n\n\n\n\n')
+        #print(data)
+        layout = {
+            'height': 500,
+            'width': '100%',
+            'sankey': {
+                'iterations': 0,
+            'node': {
+                'colors': cores_duplicadas
+            },
+            'link': {
+                'colorMode': 'gradient',
+                'colors': cores_duplicadas
+            }
+      }
+            
+        }
         return {
             'data': data,
             'layout': layout

@@ -75,6 +75,7 @@
         class="my-card  col-12 col-md-12 q-ma-sm"
           tipoGrafico = "BoxPlotPorTrecho"
           modeloGrafico = "box"
+          divId="plot1"
           title = "Embarque de passageiros"
           subtitle = "Dados por Trecho/Viagem"
         ></GraficoPlotly>
@@ -82,15 +83,23 @@
         class="my-card  col-12 col-md-12 q-ma-sm"
           tipoGrafico = "BoxPlotPorTrechoDesembarque"
           modeloGrafico = "box"
+          divId="plot2"
           title = "Desembarque de passageiros"
           subtitle = "Dados por Trecho/Viagem"
         ></GraficoPlotly>
+        <GraficoGoogle
+        class="my-card  col-12 col-md-12 q-ma-sm"
+          tipoGrafico = "SankeyOD"
+          modeloGrafico = "box"
+          title = "Fluxo O/D de passageiros"
+          subtitle = "Contagem no período"
+        ></GraficoGoogle>
         <MapaCalor
         class="my-card  col-12 col-md-12 q-ma-sm"
           tipoGrafico = "MapaCalorEmbarque"
           modeloGrafico = "box"
-          title = "Desembarque de passageiros"
-          subtitle = "Dados por Trecho/Viagem"
+          title = "Localização de passageiros"
+          subtitle = "Mapa de calor"
         ></MapaCalor>
         </div>
       </div>
@@ -107,6 +116,7 @@ import Filtro from '../components/Dashboard/Filtro.vue'
 import CardResumo from '../components/Dashboard/CardResumo.vue'
 import GraficoGeral from '../components/Dashboard/GraficoGeral.vue'
 import GraficoPlotly from '../components/Dashboard/GraficoPlotly.vue'
+import GraficoGoogle from '../components/Dashboard/GraficoGoogle.vue'
 import MapaCalor from '../components/Dashboard/MapaCalor.vue'
 import { mapState, mapActions, mapMutations } from 'vuex'
 
@@ -136,6 +146,7 @@ export default {
     Filtro,
     GraficoGeral,
     GraficoPlotly,
+    GraficoGoogle,
     MapaCalor
   }
 }

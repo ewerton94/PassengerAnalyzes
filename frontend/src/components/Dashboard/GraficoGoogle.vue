@@ -7,10 +7,12 @@
     </q-card-section>
 
     <q-card-section v-if="graficos[tipoGrafico] && dadosObtidos" class="q-pt-none">
-      {{ graficos[tipoGrafico].data }}
-      ---
-      {{graficos[tipoGrafico].layout  }}
-      <Plotly :id="divId" :data="graficos[tipoGrafico].data" :layout="graficos[tipoGrafico].layout" :display-mode-bar="false"></Plotly>
+      <GChart
+    type="Sankey"
+    :data="graficos[tipoGrafico].data"
+    :options="graficos[tipoGrafico].layout"
+    :settings="{ packages: ['sankey'] }"
+  />
     </q-card-section>
     <q-card-section v-if="!dadosObtidos" class="q-pt-none">
       <q-skeleton height="300px" square />
@@ -20,7 +22,8 @@
 </template>
 
 <script>
-import { Plotly } from 'vue-plotly'
+import { GChart } from 'vue-google-charts'
+
 import { mapState, mapActions, mapMutations } from 'vuex'
 export default {
   name: 'PassageiroPorDia',
@@ -33,7 +36,7 @@ export default {
     }
   },
   components: {
-    Plotly
+    GChart
   },
   computed: {
     ...mapState('Core', ['graficos', 'extraFiltro'])
@@ -54,7 +57,6 @@ export default {
       await this.obterDadosGrafico(extraFiltro)
       this.dadosObtidos = true
       this.key = this.key + 1
-      console.log('this.graficos plorty')
       console.log(this.graficos)
     }
   },
@@ -62,8 +64,7 @@ export default {
     'tipoGrafico',
     'modeloGrafico',
     'title',
-    'subtitle',
-    'divId'
+    'subtitle'
   ]
 
 }
