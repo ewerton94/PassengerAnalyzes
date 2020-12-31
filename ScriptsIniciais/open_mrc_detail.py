@@ -6,6 +6,7 @@ import threading
 #from core.models import Car, Line, Company, SourceCar, Manufacturer, Model, Chassis, Bodyworker, Engine
 from unicodedata import normalize
 from datetime import datetime
+from leg import legenda_contexto
 #from operation.models import PassengerByCardType
 def break_at_text(df, condition): 
     brokens = np.split(df, condition[0])
@@ -44,5 +45,5 @@ class ReadThread(threading.Thread):
         read_file(self.file)
         
         
-for file in os.listdir('../ArquivosEntrada/RC'):
-    ReadThread('../ArquivosEntrada/RC/'+file).start()
+for file in os.listdir('../ArquivosEntrada/'+legenda_contexto+'/RC'):
+    ReadThread('../ArquivosEntrada/'+legenda_contexto+'/RC/'+file).start()

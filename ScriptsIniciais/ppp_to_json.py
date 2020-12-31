@@ -10,6 +10,7 @@ from os import listdir
 import sys
 import numpy as np
 import json
+from leg import legenda_contexto
 
 import PySimpleGUI as sg
 
@@ -216,13 +217,13 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
             #df_final = reduce_memory(df_final)
             #print(df_final.info())
             #df_final.to_csv('aa.csv')
-            df_final.to_pickle('../Resultados/df_departures_row'+ prefix + '.zip', compression='zip')
+            df_final.to_pickle('../Resultados/'+legenda_contexto+'/df_departures_row'+ prefix + '.zip', compression='zip')
             df_stops = pd.DataFrame(STOPS_DICT.values(), index =STOPS_DICT.keys())
-            df_stops.to_pickle('../Resultados/stops '+ prefix + '.zip', compression='zip')
+            df_stops.to_pickle('../Resultados/'+legenda_contexto+'/stops '+ prefix + '.zip', compression='zip')
             print('\bCriado Partidas brutas')
         else:
             df_final = df_row
-            df_stops = pd.read_pickle('../Resultados/stops '+ prefix + '.zip', compression='zip')
+            df_stops = pd.read_pickle('../Resultados/'+legenda_contexto+'/stops '+ prefix + '.zip', compression='zip')
             df_stops['LISTA'] = df_stops.apply(list, axis=1)
             STOPS_DICT = df_stops['LISTA'].to_dict()
             for key in STOPS_DICT:
@@ -340,83 +341,86 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
                 r2 = r.dropna(subset=['atendimento']).reset_index()
                 
 
-                if not r2.empty:
+                try:
+                    if not r2.empty:
                     
+                        
+                        if pd.isnull(r.loc[r.index[0], 'index']):
+                            r.loc[r.index[0], :] = r2.loc[0, :]
+                            r.loc[r.index[0], 'data_saida'] = departure[4]
+                            r.loc[r.index[0], 'data_chegada'] = departure[4]
+                        if pd.isnull(r.loc[r.index[-1], 'index']):
+                            r.loc[index[-1], :] = r2.loc[r2.index[-1], :]
+                            r.loc[index[-1], 'data_saida'] = departure[5]
+                            r.loc[index[-1], 'data_chegada'] = departure[5]
                     
-                    if pd.isnull(r.loc[r.index[0], 'index']):
-                        r.loc[r.index[0], :] = r2.loc[0, :]
-                        r.loc[r.index[0], 'data_saida'] = departure[4]
-                        r.loc[r.index[0], 'data_chegada'] = departure[4]
-                    if pd.isnull(r.loc[r.index[-1], 'index']):
-                        r.loc[index[-1], :] = r2.loc[r2.index[-1], :]
-                        r.loc[index[-1], 'data_saida'] = departure[5]
-                        r.loc[index[-1], 'data_chegada'] = departure[5]
-                
-                if pd.isnull(r.loc[1, 'data_saida']):
-                    r_base = r.dropna(subset=['atendimento']).reset_index()
-                    r.loc[1, :] = r_base.loc[0, :]
-                    r.loc[1, ['data_saida', 'data_chegada']] = departure[4]
-                if pd.isnull(r.loc[r.index[-1], 'data_saida']):
-                    r_base = r.dropna(subset=['atendimento']).reset_index()
-                    r.loc[index[-1], :] = r_base.loc[0, :]
-                    r.loc[index[-1], ['data_saida', 'data_chegada']] = departure[5]
-                    
-                    
-                r['atendimento'] = departure[2]
-                r['direction_geral'] = departure[3]
-                day = pd.to_datetime(departure[6]).date()
-                r['DATAA'] = day
-                r['HORA PARTIDA'] = departure[4]
-                r['hora_prevista'] = departure[6]
-              
-                
-                
-
-                    
-                    
-                
-                r = r.interpolate(method='ffill')
-                
-                r2 = r.select_dtypes(include=['datetime'])
-                for col in r2:
-                    r2[col] = r2[col].dt.hour*60*60 + r2[col].dt.minute*60 + r2[col].dt.second
-                    #r2[col] = r2[col].dt.days*24*60*60 + r2[col].dt.seconds
-                #print(r2)
-                #r2 = r2.dt.days*24*60*60 + r2.dt.seconds
-                #r2 = r2.apply(pd.to_numeric, downcast='float')
-                if True:#try:
-                    r2[r2<0] = np.nan
-                    
-                    r2 = r2.interpolate(method='linear')
-                    #print(r2)
-                    day  =pd.to_datetime(day)
-                    for col in r2:
-                        r2[col] = r2[col].apply(lambda x: pd.Timedelta(seconds=x) + day)
-                    #r2 = r2.apply(pd.to_datetime, unit='ns')
-                    #print(r2)
-                    #dddd
-                    r[r2.columns] = r2
-                    
-                    r['number_line'] = departure[0]
-                    r['name_line'] =  departure[1]
-                    r['company'] =  c
-                    r = r.fillna(method='ffill')
-                    r = r.reset_index()
+                    if pd.isnull(r.loc[1, 'data_saida']):
+                        r_base = r.dropna(subset=['atendimento']).reset_index()
+                        r.loc[1, :] = r_base.loc[0, :]
+                        r.loc[1, ['data_saida', 'data_chegada']] = departure[4]
+                    if pd.isnull(r.loc[r.index[-1], 'data_saida']):
+                        r_base = r.dropna(subset=['atendimento']).reset_index()
+                        r.loc[index[-1], :] = r_base.loc[0, :]
+                        r.loc[index[-1], ['data_saida', 'data_chegada']] = departure[5]
+                        
+                        
+                    r['atendimento'] = departure[2]
+                    r['direction_geral'] = departure[3]
+                    day = pd.to_datetime(departure[6]).date()
+                    r['DATAA'] = day
+                    r['HORA PARTIDA'] = departure[4]
                     r['hora_prevista'] = departure[6]
+                
                     
-                    r = r[['ordem_ponto', 'DATAA', 'HORA PARTIDA','hora_prevista', 'atendimento', 'data_chegada', 'data_saida', 'direction_geral', 'n_departure', 'company', 'number_line', 'name_line']]
-                    r['stop_id'] = stop_id
-                    r['car'] = car
                     
-                    #print(r)
-                    #print(r[['ordem_ponto', 'data_chegada', 'data_saida']])
-                    #roooooo
+
+                        
+                        
                     
-                    new_dfs.append(reduce_memory(r.copy()))
-                    COUNT_MASTER += 1
+                    r = r.interpolate(method='ffill')
+                    
+                    r2 = r.select_dtypes(include=['datetime'])
+                    for col in r2:
+                        r2[col] = r2[col].dt.hour*60*60 + r2[col].dt.minute*60 + r2[col].dt.second
+                        #r2[col] = r2[col].dt.days*24*60*60 + r2[col].dt.seconds
+                    #print(r2)
+                    #r2 = r2.dt.days*24*60*60 + r2.dt.seconds
+                    #r2 = r2.apply(pd.to_numeric, downcast='float')
+                    if True:#try:
+                        r2[r2<0] = np.nan
+                        
+                        r2 = r2.interpolate(method='linear')
+                        #print(r2)
+                        day  =pd.to_datetime(day)
+                        for col in r2:
+                            r2[col] = r2[col].apply(lambda x: pd.Timedelta(seconds=x) + day)
+                        #r2 = r2.apply(pd.to_datetime, unit='ns')
+                        #print(r2)
+                        #dddd
+                        r[r2.columns] = r2
+                        
+                        r['number_line'] = departure[0]
+                        r['name_line'] =  departure[1]
+                        r['company'] =  c
+                        r = r.fillna(method='ffill')
+                        r = r.reset_index()
+                        r['hora_prevista'] = departure[6]
+                        
+                        r = r[['ordem_ponto', 'DATAA', 'HORA PARTIDA','hora_prevista', 'atendimento', 'data_chegada', 'data_saida', 'direction_geral', 'n_departure', 'company', 'number_line', 'name_line']]
+                        r['stop_id'] = stop_id
+                        r['car'] = car
+                        
+                        #print(r)
+                        #print(r[['ordem_ponto', 'data_chegada', 'data_saida']])
+                        #roooooo
+                        
+                        new_dfs.append(reduce_memory(r.copy()))
+                        COUNT_MASTER += 1
 
 
-                    i +=1
+                        i +=1
+                except:
+                    print('Erro')
                 #except:
                 #    print('ERRO - Complexo')
                 #    print(r)
@@ -430,7 +434,7 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
             #print(df_final)
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + '.zip', compression='zip')
+            df_final.to_pickle('../Resultados/'+legenda_contexto+'/passagem por ponto'+ prefix + '.zip', compression='zip')
             df_final.to_excel('passagem por ponto'+ prefix + '.xlsx')
             print('Criado Passagem por ponto com base no tempo de viagem')
         except:
@@ -438,25 +442,25 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
             df_final = pd.concat(new_dfs[:int(COUNT_MASTER/4)], ignore_index=True)
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + ' 1.zip', compression='zip')
+            df_final.to_pickle('../Resultados/'+legenda_contexto+'/passagem por ponto'+ prefix + ' 1.zip', compression='zip')
             print('1 foi')
             df_final = pd.concat(new_dfs[int(COUNT_MASTER/4): int(COUNT_MASTER/2)], ignore_index=True)
             
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + ' 2.zip', compression='zip')
+            df_final.to_pickle('../Resultados/'+legenda_contexto+'/passagem por ponto'+ prefix + ' 2.zip', compression='zip')
             print('2 foi')
 
             df_final = pd.concat(new_dfs[int(COUNT_MASTER/2):int(COUNT_MASTER/2) + int(COUNT_MASTER/4)], ignore_index=True)
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + ' 3.zip', compression='zip')
+            df_final.to_pickle('../Resultados/'+legenda_contexto+'/passagem por ponto'+ prefix + ' 3.zip', compression='zip')
             print('3 foi')
 
             df_final = pd.concat(new_dfs[int(COUNT_MASTER/2) + int(COUNT_MASTER/4):], ignore_index=True)
         
             #df_final.to_excel('df_departures_first.xlsx')
-            df_final.to_pickle('../Resultados/passagem por ponto'+ prefix + ' 4.zip', compression='zip')
+            df_final.to_pickle('../Resultados/'+legenda_contexto+'/passagem por ponto'+ prefix + ' 4.zip', compression='zip')
             print('4 foi')
 
     else:
@@ -474,7 +478,7 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
     print('Criando passagem por ponto')
 
 
-    df_final.to_pickle('../Resultados/passagem por ponto final'+ prefix + '.zip', compression='zip')
+    df_final.to_pickle('../Resultados/'+legenda_contexto+'/passagem por ponto final'+ prefix + '.zip', compression='zip')
     #df_final.to_excel('passagem por ponto.xlsx')
     
     #print(df_final.head())
@@ -559,14 +563,14 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
     del df_final['delta_order']
     del df_final['delta_order_2']
     del df_final['delta_time']
-    df_final.to_pickle('../Resultados/passagem por ponto.zip', compression='zip')
+    df_final.to_pickle('../Resultados/'+legenda_contexto+'/passagem por ponto.zip', compression='zip')
     df_final.to_excel('passagem por ponto.xlsx')
     '''
     return ''
 
 #sg.ChangeLookAndFeel('GreenTan')
 
-dp_geral = pd.read_pickle('../Resultados/departures total'+ prefix + '.zip', compression='zip')
+dp_geral = pd.read_pickle('../Resultados/'+legenda_contexto+'/departures total'+ prefix + '.zip', compression='zip')
 
 dp_errors = dp_geral[dp_geral['fulfilled_duration'].isna()]
 dp_geral = dp_geral[~dp_geral['fulfilled_duration'].isna()]
@@ -579,7 +583,7 @@ print(dp_geral['expected_date_time'])
 
 
 try:
-    df_row = pd.read_pickle('../Resultados/df_departures_row'+ prefix + '.zip', compression='zip')
+    df_row = pd.read_pickle('../Resultados/'+legenda_contexto+'/df_departures_row'+ prefix + '.zip', compression='zip')
     files = []
 except:
     df_row = None
@@ -602,7 +606,7 @@ except:
     )
     event, values = window.Read()
     '''
-    folder_selected = '../ArquivosEntrada/TPP'
+    folder_selected = '../ArquivosEntrada/'+legenda_contexto+'/TPP'
     #root = Tk()
     #root.withdraw()
     #folder_selected = filedialog.askdirectory()
@@ -615,7 +619,7 @@ except:
 
 
 try:
-    df_departures_first = pd.read_pickle('../Resultados/df_departures_first'+ prefix + '.zip', compression='zip')
+    df_departures_first = pd.read_pickle('../Resultados/'+legenda_contexto+'/df_departures_first'+ prefix + '.zip', compression='zip')
     files = None
 except:
     df_departures_first = None
@@ -633,7 +637,7 @@ dp_geral = fix_date(dp_geral, 'expected_date_time')
 #print(dp_errors)
 
 
-with open('../Resultados/STOPS.json') as json_data:
+with open('../Resultados/'+legenda_contexto+'/STOPS.json') as json_data:
     STOPS_DICT = json.load(json_data)
     
 dp_geral.reset_index(inplace=True)
@@ -641,7 +645,7 @@ df_base=dp_geral
 dp_geral = None
 create_json_ppp(files, df_row, df_departures_first)
 #print(STOPS_DICT)
-with open('../Resultados/stops_by_line.json', 'w') as json_data:
+with open('../Resultados/'+legenda_contexto+'/stops_by_line.json', 'w') as json_data:
     json.dump(DIC_PP, json_data)
 
 print('\n\n\n\n\n\n\n\n\n\n>>>>>>>>>>>>>>>\n\nFinalizado Tempo por Ponto')

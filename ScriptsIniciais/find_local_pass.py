@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 from numpy import nan
 import xlrd
 from django.utils import timezone
+from leg import legenda_contexto
 
 
 from os import listdir
@@ -57,11 +58,11 @@ s='sem dinheiro'
 company = 'sfra'
 print('Antes do try')
 try:
-        passa = pd.read_pickle('../Resultados/passageiros e Pontos ida.zip', compression='zip')
-        departures = pd.read_pickle('../Resultados/passagem por ponto.zip'%s, compression='zip')
+        passa = pd.read_pickle('../Resultados/'+legenda_contexto+'/passageiros e Pontos ida.zip', compression='zip')
+        departures = pd.read_pickle('../Resultados/'+legenda_contexto+'/passagem por ponto.zip'%s, compression='zip')
         print()
 except:
-        departures = pd.read_pickle('../Resultados/passagem por ponto.zip', compression='zip')
+        departures = pd.read_pickle('../Resultados/'+legenda_contexto+'/passagem por ponto.zip', compression='zip')
         departures = fix_date(departures, 'data_saida')
         departures = fix_date(departures, 'data_chegada')
         departures = fix_date(departures, 'HORA PARTIDA')
@@ -81,19 +82,28 @@ except:
         departures.loc[departures['number_line'].astype(int) == 7151, 'number_line'] = 715
         
         #passa = pd.read_excel('ppp/movimento_linha_716_160519.xls', sheet_name=None)
-        passa = pd.read_pickle('../Resultados/passageiros.zip', compression='zip')
+        passa = pd.read_pickle('../Resultados/'+legenda_contexto+'/passageiros.zip', compression='zip')
         print(passa['SITUACAO'] == 'Ok')
         passa = passa[passa['SITUACAO'] == 'Ok']
         print(passa['SITUACAO'])
         
-        passa = passa.loc[passa.LINHA.astype(int).isin([716]), :]
+        passa = passa.loc[passa.LINHA.astype(int).isin([618, 700]), :]
         
         try:
+            print('No try:')
+            print(passa['HORARIO'])
+            print(passa.columns)
+            print(passa['DATA'])
             passa['HORARIO'] = pd.to_datetime(passa['HORA'].astype(str), format='%d/%m/%Y %H:%M:%S', errors='coerce')
             passa['DATA'] = pd.to_datetime(passa['HORA'].astype(str).str.split(n=1, expand=True)[0], format='%d/%m/%Y', errors='coerce')
+            
         except:
+            print('No except')
+            print(passa['HORARIO'])
+            print(passa.columns)
             passa['DATA'] = pd.to_datetime(passa['HORARIO'].astype(str).str.split(n=1, expand=True)[0], format='%d/%m/%Y', errors='coerce')
             passa['HORARIO'] = pd.to_datetime(passa['HORARIO'].astype(str), format='%d/%m/%Y %H:%M:%S', errors='coerce')
+            
             
         
         print(passa['DATA'].unique())
@@ -185,12 +195,12 @@ except:
                 passa1['via'] = np.vectorize(get_via_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
                 passa1[passa1 == 'erro'] = np.nan
 
-                #passa1[passa1['station'] == 'erro'].to_pickle('../Resultados/PassageirosPorPonto/passageiros com erro '+ str(linha) +'.zip', compression='zip')
-                #passa1[passa1['station'] == 'erro'].to_excel('../Resultados/PassageirosPorPonto/passageiros com erro '+ str(linha) +'.xlsx')
+                #passa1[passa1['station'] == 'erro'].to_pickle('../Resultados/'+legenda_contexto+'/PassageirosPorPonto/passageiros com erro '+ str(linha) +'.zip', compression='zip')
+                #passa1[passa1['station'] == 'erro'].to_excel('../Resultados/'+legenda_contexto+'/PassageirosPorPonto/passageiros com erro '+ str(linha) +'.xlsx')
                 #passa1 = passa1[passa1['station'] != 'erro']
-                #passa1.to_pickle('../Resultados/PassageirosPorPonto/passageiros e Pontos sem erro '+ str(linha) +'.zip', compression='zip')
-                passa1.to_excel('../Resultados/PassageirosPorPonto/passageiros '+ str(linha) +'.xlsx')
-                passa1.to_pickle('../Resultados/PassageirosPorPonto/passageiros_pontos '+ str(linha) +'.zip', compression='zip')
+                #passa1.to_pickle('../Resultados/'+legenda_contexto+'/PassageirosPorPonto/passageiros e Pontos sem erro '+ str(linha) +'.zip', compression='zip')
+                passa1.to_excel('../Resultados/'+legenda_contexto+'/PassageirosPorPonto/passageiros '+ str(linha) +'.xlsx')
+                passa1.to_pickle('../Resultados/'+legenda_contexto+'/PassageirosPorPonto/passageiros_pontos '+ str(linha) +'.zip', compression='zip')
                 
         print('*****************************\nCarros com erro:\n- ', '\n- '.join(list(set([' - '.join(e) for e in carros_com_erro]))), sep='')
         

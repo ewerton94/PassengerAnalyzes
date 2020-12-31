@@ -8,7 +8,7 @@ from tkinter import filedialog
 from tkinter import *
 from os import listdir
 import sys
-
+from leg import legenda_contexto
 
 
 
@@ -135,7 +135,7 @@ def create_json_departures(files, III):
 
 
 
-folder_selected = '../ArquivosEntrada/TV'
+folder_selected = '../ArquivosEntrada/'+legenda_contexto+'/TV'
 
 print(listdir(folder_selected))
 final = []
@@ -148,6 +148,6 @@ for folder in listdir(folder_selected):
     final.append(df)
     print('\n\n\n\n\n\n\n\n\n\n>>>>>>>>>>>>>>>')
 final = pd.concat(final, ignore_index=True)
-final.to_pickle('../Resultados/departures total.zip', compression='zip')
+final.to_pickle('../Resultados/'+legenda_contexto+'/departures total.zip', compression='zip')
 #final.to_excel('departures total.xlsx')
 
