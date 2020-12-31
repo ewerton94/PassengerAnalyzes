@@ -36,8 +36,12 @@ export default {
   computed: {
     ...mapState('Core', ['graficos', 'extraFiltro'])
   },
-  created () {
-    this.start()
+  mounted () {
+    setTimeout(() => {
+      this.start()
+    }, this.timeout * 1000
+
+    )
   },
 
   methods: {
@@ -46,13 +50,13 @@ export default {
     async start () {
       // await this.ADD_NEW_EXTRA_FILTRO({ newExtraFiltroKey: 'linhas', newExtraFiltroValue: this.$router.currentRoute.query.linhas })
       var extraFiltro = await this.extraFiltro
-      console.log(extraFiltro)
+      // console.log(extraFiltro)
       extraFiltro = JSON.parse(JSON.stringify(extraFiltro))
       extraFiltro.tipo_grafico = this.tipoGrafico
       await this.obterDadosGrafico(extraFiltro)
       this.dadosObtidos = true
       this.key = this.key + 1
-      console.log(this.graficos)
+      // console.log(this.graficos)
     }
   },
   props: [

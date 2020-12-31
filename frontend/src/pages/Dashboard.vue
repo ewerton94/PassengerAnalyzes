@@ -57,6 +57,7 @@
           modeloGrafico = "bar"
           title = "Demanda de passageiros"
           subtitle = "Dados por dia da semana"
+          :timeout="1"
         ></GraficoGeral>
         </div>
         <div class="col-12 col-md-6 ">
@@ -67,6 +68,7 @@
           modeloGrafico = "area"
           title = "Demanda de passageiros"
           subtitle = "Dados por hora do dia"
+          :timeout="1"
         ></GraficoGeral>
         </div>
         <div class="col-12 col-md-12 ">
@@ -78,21 +80,25 @@
           divId="plot1"
           title = "Embarque de passageiros"
           subtitle = "Dados por Trecho/Viagem"
+          :timeout="2"
         ></GraficoPlotly>
         <GraficoPlotly
-        class="my-card  col-12 col-md-12 q-ma-sm"
+          class="my-card  col-12 col-md-12 q-ma-sm"
           tipoGrafico = "BoxPlotPorTrechoDesembarque"
           modeloGrafico = "box"
           divId="plot2"
           title = "Desembarque de passageiros"
           subtitle = "Dados por Trecho/Viagem"
+          :timeout="3"
         ></GraficoPlotly>
+
         <GraficoGoogle
         class="my-card  col-12 col-md-12 q-ma-sm"
           tipoGrafico = "SankeyOD"
           modeloGrafico = "box"
           title = "Fluxo O/D de passageiros"
           subtitle = "Contagem no período"
+          :timeout="4"
         ></GraficoGoogle>
         <MapaCalor
         class="my-card  col-12 col-md-12 q-ma-sm"
@@ -100,6 +106,7 @@
           modeloGrafico = "box"
           title = "Localização de passageiros"
           subtitle = "Mapa de calor"
+          :timeout="4"
         ></MapaCalor>
         </div>
       </div>
