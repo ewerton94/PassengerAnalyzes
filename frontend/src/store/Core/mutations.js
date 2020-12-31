@@ -18,7 +18,7 @@ const SET_INFO_LINHAS = (state, payload) => {
 }
 const SET_INFO_GRAFICO = (state, payload) => {
   state.graficos[payload.tipoGrafico] = payload.data
-  console.log(state.graficos[payload.tipoGrafico])
+  /// console.log(state.graficos[payload.tipoGrafico])
 }
 
 const ICREMENT_GERALKEY = (state, payload) => {
