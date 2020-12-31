@@ -10,6 +10,7 @@ from .serializers import *
 from .models import *
 from .dataframe import *
 import pandas as pd
+from datetime import datetime
 from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes, parser_classes
@@ -62,6 +63,7 @@ class LinhaViewSet(viewsets.ModelViewSet):
     @action(detail=False,  methods=['get',])
     def grafico(self, request, pk=None):
         ''''''
+        d = datetime.now()
         linhas = request.GET.get('linhas')
         if linhas is None:
             return Response(status=status.HTTP_201_CREATED)
@@ -71,7 +73,9 @@ class LinhaViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_201_CREATED)
         viagens = ViagemDePassageiro.objects.filter(partida_embarque__linha__numero__in=linhas)
         viagens = self.qs_extra_filtro(viagens, request.GET)
-        return Response(eval(tipo_grafico+'(viagens).calcular()'))
+        r = eval(tipo_grafico+'(viagens).calcular()')
+        print('\n\n-------\n', tipo_grafico, datetime.now() - d, '\n----')
+        return Response(r)
 
     @action(detail=False,  methods=['get',])
     def calcular_desembarque(self, request, pk=None):
