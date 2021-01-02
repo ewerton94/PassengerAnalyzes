@@ -1,17 +1,19 @@
 import pandas as pd
 from core.models import Carro
-for car in Carro.objects.all():
+for car in Carro.objects.exclude(numero='SAVEIRO'):
     car.numero = str(int(float(car.numero)))
     car.save()
 existing = [c.numero for c in Carro.objects.all()]
 files = [
     #'VEICULOS ATUAL VELEIRO.xlsx', 
-    'VEICULOS ATUAL SFRA.xlsx',
+    'a.xlsx',
     #'VEICULOS ATUAL REAL.xlsx',
     #'VEICULOS ATUAL CIMA.xlsx'
 ]
 for file in files:
-    cars = pd.read_excel(file)
+    print(file)
+    cars = pd.read_excel(file, engine='openpyxl')
+    cars = cars[cars.Prefixo != 'SAVEIRO']
     for i, car in cars.iterrows():
         carro = Carro.objects.filter(placa=car.Placa, ultimo_carro=None)
         if carro:
