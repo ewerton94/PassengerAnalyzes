@@ -79,7 +79,7 @@ class LinhaViewSet(viewsets.ModelViewSet):
 
     @action(detail=False,  methods=['get',])
     def calcular_desembarque(self, request, pk=None):
-        viagens = ViagemDePassageiro.objects.all()
+        viagens = ViagemDePassageiro.objects.filter(partida_embarque__isnull=False, ponto_embarque__isnull=False)#partida_embarque__linha__numero__in=['716']
         CalcularDesembarque(viagens).calcular()
         CalcularLotacaoPorTrecho(viagens).calcular()
         return Response('ok')
