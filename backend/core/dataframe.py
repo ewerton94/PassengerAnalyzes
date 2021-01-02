@@ -30,94 +30,110 @@ def closest_point(point, points):
     #print(len(point), len(points))
     if len(points) > 0:
         return points[cdist([point], points).argmin()]
+    #print('Retornando nam')
     return np.nan
 from bulk_update.helper import bulk_update
 
 
 class CalcularDesembarque(BaseData):
-    columns = ['id', 'cartao_id', 'partida_embarque_id', 'partida_embarque__sentido','horario', 'ponto_embarque__ponto__codigo', 'partida_embarque__linha_id', 'partida_embarque__atendimento', 'ponto_embarque__ponto_id']
-    names = ['id', 'cartao', 'partida_embarque', 'sentido', 'horario', 'ponto', 'linha', 'atendimento', 'ponto_id']
+    columns = ['id', 'cartao_id', 'partida_embarque_id', 'partida_embarque__sentido','horario', 'ponto_embarque__ponto__codigo', 'partida_embarque__linha_id', 'partida_embarque__atendimento', 'ponto_embarque__ponto_id', 'ponto_embarque_id']
+    names = ['id', 'cartao', 'partida_embarque', 'sentido', 'horario', 'ponto', 'linha', 'atendimento', 'ponto_id', 'pe_id']
 
     def calcular(self):
-        self.queryset = self.queryset.filter(calculou_ponto_desembarque=False)
+        #self.queryset = self.queryset.filter(calculou_ponto_desembarque=False)
         if self.queryset.exists():
-            df = self.get_df()
-            df.columns = self.names
-            df = df.sort_values(by=['cartao', 'horario'])
-            df['data'] = df['horario'].dt.date
-            df = df[df.groupby(['cartao', 'data'])['horario'].transform('count') > 1]
-            df['next_ponto'] = df['ponto'].shift(-1)
-            df['next_ponto_id'] = df['ponto_id'].shift(-1)
-            df['next_sentido'] = df['sentido'].shift(-1)
-            df['next_partida_embarque'] = df['partida_embarque'].shift(-1)
-            df = df[df['ponto'].shift(-1) != df['ponto']]
-            df = df[df['partida_embarque'].shift(-1) != df['partida_embarque']]
-            df.loc[df['cartao'].shift(-1) != df['cartao'], ['next_ponto', 'next_ponto_id', 'next_partida_embarque', 'next_sentido']] = np.nan
-            df = df[df.groupby(['cartao', 'data'])['horario'].transform('count') > 1]
-            for cartao, df_ in  df[['cartao', 'ponto', 'next_ponto', 'next_ponto_id','sentido', 'next_sentido']].groupby('cartao'):
-                df.loc[df_.index[-1], ['next_ponto', 'next_ponto_id', 'next_sentido']] = list(df.loc[df_.index[0], ['ponto', 'ponto_id', 'sentido']].values)
-            dic_ordem = {(o.ponto_id, o.linha_id, o.atendimento, o.sentido): o.ordem for o in OrdemPontosLinha.objects.all()}
-            #print(dic_ordem.keys())
-            df['ordem'] = np.vectorize(get_order)(dic_ordem, df['ponto_id'].astype(int).values, df['linha'].values, df['atendimento'].values, df['sentido'].values)
-            df['next_ordem'] = np.vectorize(get_order)(dic_ordem, df['next_ponto_id'].astype(int).values, df['linha'].values, df['atendimento'].values, df['sentido'].values)
-            dic_pontos_ordem = {p: o for p, o in zip(df['ponto_id'], df['ordem'])}
-            dic_pontos = {p.id: (p.lat, p.lon) for p in Ponto.objects.all()}
-            dic_coordenadas = {(lat, lon, c): id  for id, lat, lon, c in PontoPorEmpresa.objects.all().values_list('id', 'ponto__lat', 'ponto__lon', 'empresa_id').distinct()}
-            #dic_coordenadas_ordem = {(p.lat, p.lon): p.id  for p in Ponto.objects.all()}
-            df_pontos = df[['ponto_id', 'ordem', 'next_ponto_id', 'next_ordem']]
-            df_pontos.loc[:, 'coordenadas']=df_pontos['ponto_id'].map(dic_pontos)
-            partida_embarques = Partida.objects.all().values_list('id', 'horario_prevista_terminal', 'carro_id')
-            partida_embarques = pd.DataFrame(list(partida_embarques), columns=['id', 'partida_embarque', 'carro'])
-            partida_embarques = partida_embarques.sort_values(by=['carro', 'partida_embarque'])
-            partida_embarques['next_partida_embarque'] = partida_embarques['id'].shift(-1)
-            print('partida_embarque')
-            print(partida_embarques)
-            partida_embarques = {id_: next_ for id_, next_ in zip(partida_embarques.id.values, partida_embarques.next_partida_embarque.values)}
-            #print('partida_embarques')
-            #print(partida_embarques)
-            nex_partida_embarque = {}
-            print(df)
-            
-            df = df[['id', 'ordem', 'next_ponto_id', 'next_ordem', 'partida_embarque', 'sentido']]
-            df.loc[:, 'coordenadas'] = df['next_ponto_id'].map(dic_pontos)
-            df['closest'] = [closest_point(x, list(df_pontos[df_pontos['ordem']>omin]['coordenadas'])) for x, omin in zip(df['coordenadas'], df['ordem'])]
-            df = df[~pd.isnull(df.closest)]
-            #print(dic_coordenadas)
-            df['desembarque_id'] = df['closest'].apply(lambda x: dic_coordenadas[(x[0], x[1], 2)])
-            df['desembarque_ordem'] = df['desembarque_id'].map(dic_pontos_ordem)
-            print(df[['partida_embarque', 'ordem', 'desembarque_ordem']])
-            filtro = (df['desembarque_ordem'] > 1000) & (df['sentido'] == 'ida')
-            print(df.loc[filtro, 'partida_embarque'])
-            df.loc[filtro, 'partida_embarque'] = df.loc[filtro, 'partida_embarque'].map(partida_embarques)
-            print(df.loc[filtro, 'partida_embarque'])
+            df_ = self.get_df()
+            df_.columns = self.names
+            df_ = df_.sort_values(by=['cartao', 'horario'])
+            for linha, df in df_.groupby('linha'):
+                print('\n\n\n\n\n\n\n\n\n------------------------------------\n\nComeçando', linha)
+                df['data'] = df['horario'].dt.date
+                df = df[df.groupby(['cartao', 'data'])['horario'].transform('count') > 1]
+                df['next_ponto'] = df['ponto'].shift(-1)
+                df['next_ponto_id'] = df['ponto_id'].shift(-1)
+                df['next_sentido'] = df['sentido'].shift(-1)
+                df['next_partida_embarque'] = df['partida_embarque'].shift(-1)
+                df = df[df['ponto'].shift(-1) != df['ponto']]
+                
+                df = df[df['partida_embarque'].shift(-1) != df['partida_embarque']]
+                df.loc[df['cartao'].shift(-1) != df['cartao'], ['next_ponto', 'next_ponto_id', 'next_partida_embarque', 'next_sentido']] = np.nan
+                df = df[df.groupby(['cartao', 'data'])['horario'].transform('count') > 1]
+                print(df)
+                print('procurando')
+                
+                for cartao, df_ in  df[['cartao', 'ponto', 'next_ponto', 'next_ponto_id','sentido', 'next_sentido']].groupby('cartao'):
+                    df.loc[df_.index[-1], ['next_ponto', 'next_ponto_id', 'next_sentido']] = list(df.loc[df_.index[0], ['ponto', 'ponto_id', 'sentido']].values)
+                
+                dic_ordem = {(o.ponto_id, o.linha_id, o.atendimento, o.sentido): o.ordem for o in OrdemPontosLinha.objects.all()}
+                #print(dic_ordem.keys())
+                print(df)
+                print('Antes da ordem')
+                df['ordem'] = np.vectorize(get_order)(dic_ordem, df['ponto_id'].astype(int).values, df['linha'].values, df['atendimento'].values, df['sentido'].values)
+                df['next_ordem'] = np.vectorize(get_order)(dic_ordem, df['next_ponto_id'].astype(int).values, df['linha'].values, df['atendimento'].values, df['sentido'].values)
+                dic_pontos_ordem = {p: o for p, o in zip(df['pe_id'], df['ordem'])}
+                dic_pontos = {p.id: (p.lat, p.lon) for p in Ponto.objects.filter(id__in=df['ponto_id'].values)}
+                dic_coordenadas = {(lat, lon, c): id  for id, lat, lon, c in PontoPorEmpresa.objects.all().values_list('id', 'ponto__lat', 'ponto__lon', 'empresa_id').distinct()}
+                print('Carregou dicionários')
+                #dic_coordenadas_ordem = {(p.lat, p.lon): p.id  for p in Ponto.objects.all()}
+                df_pontos = df[['ponto_id', 'ordem', 'next_ponto_id', 'next_ordem']]
+                df_pontos.loc[:, 'coordenadas']=df_pontos['ponto_id'].map(dic_pontos)
+                #df_pontos = df_pontos.drop_duplicates(subset=['ponto_id', 'ordem', 'next_ponto_id', 'next_ordem'])
+                partida_embarques = Partida.objects.all().values_list('id', 'horario_prevista_terminal', 'carro_id')
+                partida_embarques = pd.DataFrame(list(partida_embarques), columns=['id', 'partida_embarque', 'carro'])
+                partida_embarques = partida_embarques.sort_values(by=['carro', 'partida_embarque'])
+                partida_embarques['next_partida_embarque'] = partida_embarques['id'].shift(-1)
+                print('partida_embarque')
+                print(partida_embarques)
+                partida_embarques = {id_: next_ for id_, next_ in zip(partida_embarques.id.values, partida_embarques.next_partida_embarque.values)}
+                #print('partida_embarques')
+                #print(partida_embarques)
+                nex_partida_embarque = {}
+                print(df)
+                
+                df = df[['id', 'ordem', 'next_ponto_id', 'next_ordem', 'partida_embarque', 'sentido']]
+                df.loc[:, 'coordenadas'] = df['next_ponto_id'].map(dic_pontos)
+                df['closest'] = [closest_point(x, list(df_pontos[df_pontos['ordem']>omin]['coordenadas'])) for x, omin in zip(df['coordenadas'], df['ordem'])]
+                df = df[~pd.isnull(df.closest)]
+                #print(dic_coordenadas)
+                df['desembarque_id'] = df['closest'].apply(lambda x: dic_coordenadas[(x[0], x[1], 2)])
+                print(df['desembarque_id'])
+                print(dic_pontos_ordem)
+                df['desembarque_ordem'] = df['desembarque_id'].map(dic_pontos_ordem)
+                print(df[['partida_embarque', 'ordem', 'desembarque_id', 'desembarque_ordem']])
+
+                print(df['sentido'])
+                filtro = (df['desembarque_ordem'] > 1000) & (df['sentido'] == 'ida')
+                print(df.loc[filtro, 'partida_embarque'])
+                df.loc[filtro, 'partida_embarque'] = df.loc[filtro, 'partida_embarque'].map(partida_embarques)
+                print(df.loc[filtro, 'partida_embarque'])
 
 
 
-            #df2['closest'] = [closest_point(x, list(df1['point'])) for x in df2['point']]
-            #df['cartao'] = df['cartao'].astype(str).apply(lambda x: x[:6])
-            #df = df[['cartao', 'partida_embarque', 'horario', 'ponto', 'next_ponto']]
-            #df['next_cartao'] = df['cartao'].shift(-1)
-            print(df.columns)
-            print(df[['partida_embarque', 'ordem', 'desembarque_ordem']])
-            df = df[df.desembarque_ordem > df.ordem]
-            print(df.loc[pd.isnull(df.partida_embarque), ['partida_embarque', 'ordem', 'desembarque_ordem']])
-            df = df.dropna(subset=['partida_embarque'])
-            vs = self.queryset.filter(id__in=df.id.values)
-            for v in vs:
-                v.ponto_desembarque_id = int(df.loc[df.id == v.id, 'desembarque_id'])
-                #print(int(df.loc[df.id == v.id, 'partida_embarque']))
-                #print(df.loc[df.id == v.id, :])
-                '''
-                if v.partida_embarque_id !=  int(df.loc[df.id == v.id, 'partida_embarque']):
-                    p = Partida_embarque.objects.get(id=int(df.loc[df.id == v.id, 'partida_embarque']))
-                    print(v.horario, v.partida_embarque.horario_realizada_terminal, v.partida_embarque.sentido, p.horario_realizada_terminal, p.sentido)
-                    eeeee
-                '''
+                #df2['closest'] = [closest_point(x, list(df1['point'])) for x in df2['point']]
+                #df['cartao'] = df['cartao'].astype(str).apply(lambda x: x[:6])
+                #df = df[['cartao', 'partida_embarque', 'horario', 'ponto', 'next_ponto']]
+                #df['next_cartao'] = df['cartao'].shift(-1)
+                print(df.columns)
+                print(df[['partida_embarque', 'ordem', 'desembarque_ordem']])
+                df = df[df.desembarque_ordem > df.ordem]
+                print(df.loc[pd.isnull(df.partida_embarque), ['partida_embarque', 'ordem', 'desembarque_ordem']])
+                df = df.dropna(subset=['partida_embarque'])
+                vs = self.queryset.filter(id__in=df.id.values)
+                for v in vs:
+                    v.ponto_desembarque_id = int(df.loc[df.id == v.id, 'desembarque_id'])
+                    #print(int(df.loc[df.id == v.id, 'partida_embarque']))
+                    #print(df.loc[df.id == v.id, :])
+                    '''
+                    if v.partida_embarque_id !=  int(df.loc[df.id == v.id, 'partida_embarque']):
+                        p = Partida_embarque.objects.get(id=int(df.loc[df.id == v.id, 'partida_embarque']))
+                        print(v.horario, v.partida_embarque.horario_realizada_terminal, v.partida_embarque.sentido, p.horario_realizada_terminal, p.sentido)
+                        eeeee
+                    '''
 
-                v.partida_desembarque_id = int(df.loc[df.id == v.id, 'partida_embarque'])
-            #errrr
-            bulk_update(vs)
-            self.queryset.update(calculou_ponto_desembarque=True)
+                    v.partida_desembarque_id = int(df.loc[df.id == v.id, 'partida_embarque'])
+                #errrr
+                bulk_update(vs)
+                self.queryset.update(calculou_ponto_desembarque=True)
             return True
         else: 
             return False
@@ -317,19 +333,10 @@ class SankeyOD(BaseData):
     def calcular(self):
         df = self.get_df()
         ordem_ponto = {(p, s): o for p, o, s in OrdemPontosLinha.objects.select_related().all().values_list('ponto__trecho__nome', 'ordem', 'sentido').distinct()}
-        #print(df[self.tipo_ponto])
         un = df[self.tipo_ponto].unique()
-        #print(un)
-        #od = df[['ponto_embarque__ponto__trecho__nome', 'ponto_desembarque__ponto__trecho__nome']].drop_duplicates()
-        #print(list(zip(df[self.tipo_ponto].values, df.partida_embarque__sentido.values)))
-        #print('Antes', self.tipo_ponto)
-        #print('\n\n\n\n>>>>>>>>>>>>\n\n', 'list(un.values)')
-        #print(list(un))
         pontos = list([ee for ee in sorted(list(un), key=lambda x: get_order_trecho_ida(ordem_ponto, x)) if not ee is None])
-        #print(pontos)
         df.loc[:, 'quantidade'] = 1
         df = df.groupby(['ponto_embarque__ponto__trecho__nome', 'ponto_desembarque__ponto__trecho__nome']).count().reset_index()
-        #print('DDDD')
         df['O'] = df['ponto_embarque__ponto__trecho__nome'] + ' (O)'
         df['D'] = df['ponto_desembarque__ponto__trecho__nome']+ ' (D)'
         df['ordemO'] = df['ponto_embarque__ponto__trecho__nome'].apply(lambda x: get_order_trecho_ida(ordem_ponto, x))
@@ -448,6 +455,14 @@ class MapaCalorEmbarque(BoxPlotPorTrecho):
             'lat': lat,
             'lng': lng,
         }
+class ViagensVazias(BaseData):
+
+    
+    columns = ['ponto_embarque__ponto__trecho__nome', 'partida_embarque__horario_prevista_terminal', 'partida_embarque__sentido']
+    def calcular(self):
+        self.queryset = self.queryset.filter(partida_desembarque__isnull=False)
+        df = self.get_df()
+        return df
 
 class DadosPorHoraDoDia(BaseData):
     
