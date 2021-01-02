@@ -533,7 +533,9 @@ print(df_row.columns)
 cols = ['company', 'line', 'atendimento', 'sentido', 'stop_id', 'adress', 'ordem_ponto']
 df = df_row.drop_duplicates(cols)
 df = df[cols]
+
 df_row=None
+df = df[(~df.line.str.startswith('798')) & (~df.line.str.startswith('102')) & (~df.line.str.startswith('802')) & (~df.line.str.startswith('056')) & (~df.line.str.startswith('710')) &  (~df.line.str.startswith('719')) & (~df.line.str.startswith('709')) & (~df.line.str.startswith('001'))]
 df = df.sort_values(by=['line', 'atendimento',  'sentido', 'ordem_ponto'])
 df2 = df['adress'].str.split(',', expand=True)
 print(df2)
@@ -606,19 +608,41 @@ def get_location(adress, bairro, cidade):
             erros.append(adress)
             return '0,0'
 
+df_base = pd.read_excel('base_pontos.xlsx')
+DIC_BASE = {}
+np.vectorize(lambda c, s, lat, lon, t: DIC_BASE.setdefault((c, s), {'LAT': lat, 'LON': lon, 'TRECHO': t}))(df_base['company'].values, df_base['stop_id'].values, df_base['LAT'].values, df_base['LON'].values, df_base['TRECHO'].values)
+df2 = df[df.stop_id.isin(df_base.stop_id.unique())]
+df2['LAT'] = np.vectorize(lambda x, y: DIC_BASE[(x, y)]['LAT'])(df2['company'].values, df2['stop_id'].values)
+df2['LON'] = np.vectorize(lambda x, y: DIC_BASE[(x, y)]['LON'])(df2['company'].values, df2['stop_id'].values)
+df2['TRECHO'] = np.vectorize(lambda x, y: DIC_BASE[(x, y)]['TRECHO'])(df2['company'].values, df2['stop_id'].values)
+df2['latlon'] = df2['LAT'].astype(str) + ', ' + df2['LON'].astype(str)
 
-np.vectorize(get_location)(df.adress.values, df.bairro.values, df.cidade.values)
-print(DIC_AD)
-print('\n\n\nERROS\n\n\n')
-print(erros)
-stops = pd.DataFrame(DIC_AD.values(), index=DIC_AD.keys()).to_pickle('AD LOC'+ prefix + '.zip', compression='zip')
-df['latlon'] = np.vectorize(lambda x: DIC_AD.get(x))(df.adress.values)
-df['ID'] = df['ordem_ponto'].astype(str) + '-' +  df['stop_id'].astype(str)
-df.to_pickle('PONTOS LOC'+ prefix + '.zip', compression='zip')
-df.to_excel('PONTOS LOC'+ prefix + '.xlsx')
+print(df2)
+
+df = df[~df.stop_id.isin(df_base.stop_id.unique())]
+
+if not df.empty:
+    np.vectorize(get_location)(df.adress.values, df.bairro.values, df.cidade.values)
+    print(DIC_AD)
+    print('\n\n\nERROS\n\n\n')
+    print(erros)
+    stops = pd.DataFrame(DIC_AD.values(), index=DIC_AD.keys()).to_pickle('AD LOC'+ prefix + '.zip', compression='zip')
+    df['latlon'] = np.vectorize(lambda x: DIC_AD.get(x))(df.adress.values)
+    df['TRECHO'] = ''
+    df2 = df2.loc[:, df.columns]
+    df = pd.concat([df, df2], ignore_index=True)
+    df['ID'] = df['ordem_ponto'].astype(str) + '-' +  df['stop_id'].astype(str)
+    df.to_pickle('PONTOS LOC'+ prefix + '.zip', compression='zip')
+    df.to_excel('PONTOS LOC'+ prefix + '.xlsx')
 
 
-with open('AD.json', encoding='utf-8', mode='w') as fh:
-    fh.write(json.dumps(DIC_AD))
 
-print(df)
+
+    with open('AD.json', encoding='utf-8', mode='w') as fh:
+        fh.write(json.dumps(DIC_AD))
+
+    print(df)
+
+else:
+    df2.to_pickle('PONTOS LOC'+ prefix + '.zip', compression='zip')
+    df2.to_excel('PONTOS LOC'+ prefix + '.xlsx')

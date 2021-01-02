@@ -87,7 +87,7 @@ except:
         passa = passa[passa['SITUACAO'] == 'Ok']
         print(passa['SITUACAO'])
         
-        passa = passa.loc[passa.LINHA.astype(int).isin([618, 700]), :]
+        passa = passa.loc[passa.LINHA.astype(int).isin([57, 58, 65, 68, 108, 711, 712, 715, 716]), :]
         
         try:
             print('No try:')
@@ -119,7 +119,7 @@ except:
 
         #print(passa)
         
-        carros_com_erro_DICT = {8563: 3563, 7331: 2114, 7029: 2902}
+        carros_com_erro_DICT = {8563: 3563, 7241: 2105, 7281: 2109, 7291: 2110, 7331: 2114, 7371: 2118, 7029: 2902, }
         passa.loc[:, 'CARRO'] = passa.loc[:, 'CARRO'].apply(lambda x: carros_com_erro_DICT.get(int(x), int(x)))
 
         for linha in linhas:
