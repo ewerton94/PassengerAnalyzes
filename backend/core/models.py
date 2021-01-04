@@ -88,6 +88,7 @@ class ViagemDePassageiro(models.Model):
     partida_desembarque = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='desembarque_de_passageiros', null=True, blank=True)
     horario = models.DateTimeField(auto_now_add=False)
     integracao = models.BooleanField(default=False)
+    valor = models.FloatField(default=0.0)
     calculou_ponto_desembarque = models.BooleanField(default=False)
 
 class LinhaPorDiaSemana(models.Model):
