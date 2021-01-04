@@ -28,10 +28,15 @@ from scipy.spatial.distance import cdist
 def closest_point(point, points):
     """ Find closest point from a list of points. """
     #print(len(point), len(points))
-    if len(points) > 0:
-        return points[cdist([point], points).argmin()]
+    try:
+        if len(points) > 0:
+            return points[cdist([point], points).argmin()]
     #print('Retornando nam')
-    return np.nan
+        return np.nan
+    except:
+        print('EROOOOO\n\n\n\n\n\n\n\n\n\n\n>>>>>>')
+        print([point], points)
+        return np.nan
 from bulk_update.helper import bulk_update
 
 
