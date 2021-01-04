@@ -46,6 +46,11 @@ def get_sentido_pass(cartao, horario):
                 return LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))]['direction']
         except:
                 return 'erro'
+def get_duracao_ciclo_pass(cartao, horario):
+        try:
+                return LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))]['duracao_ciclo']
+        except:
+                return 'erro'
 
 
 def fix_date(df, col):
@@ -182,7 +187,8 @@ except:
                                 
                                 try:
                                         l = dep.iloc[dep.index.get_loc(pd.to_datetime(horario), method='nearest', tolerance=pd.Timedelta('10Min'))]
-                                        LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))] = {'linha': l['atendimento'], 'partida_prevista': l['hora_prevista'], 'partida_realizada': l['HORA PARTIDA'],'direction': l['direction_geral'], 'stop': l['stop_id'], 'via': ''}
+                                        #LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))] = {'linha': l['atendimento'], 'partida_prevista': l['hora_prevista'], 'partida_realizada': l['HORA PARTIDA'], 'duracao_ciclo': l['duracao_ciclo'], 'direction': l['direction_geral'], 'stop': l['stop_id'], 'via': ''}
+                                        LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))] = {'linha': l['atendimento'], 'partida_prevista': l['hora_prevista'], 'partida_realizada': l['HORA PARTIDA'], 'direction': l['direction_geral'], 'stop': l['stop_id'], 'via': ''}
                                         achou_algum = True
                                 except:
                                         carros_com_erro.append((str(carro), str(pd.to_datetime(horario).day)))
@@ -195,6 +201,7 @@ except:
                 passa1['linha'] = np.vectorize(get_linha_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
                 passa1['partida_prevista'] = np.vectorize(get_partida_prevista_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
                 passa1['partida_realizada'] = np.vectorize(get_partida_realizada_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
+                passa1['duracao_ciclo'] = np.vectorize(get_duracao_ciclo_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
                 #passa1['partida'] = np.vectorize(get_partida_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
                 passa1['sentido'] = np.vectorize(get_sentido_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
                 
