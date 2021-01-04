@@ -5,7 +5,8 @@ import os
 import pytz
 #from read_table import *
 #from refresh_cars import *
-legenda_contexto = '200'
+#legenda_contexto = '200'
+legenda_contexto = '3 a 10-10-2020'
 
 pre = '../Resultados/'+legenda_contexto+'/'
 pos = ''
@@ -81,17 +82,18 @@ def create_viagens(df):
     dic_carros = {c.numero: c for c in Carro.objects.all()}
 
     df1 = df[~df.linha.isna()]
-    df2 = df1.drop_duplicates(['LINHA', 'CARRO', 'partida'])
+    df2 = df1.drop_duplicates(['LINHA', 'CARRO', 'partida_prevista'])
     maceio_tz = pytz.timezone("UTC")
 
-    Partida.objects.all().delete()
+    #Partida.objects.all().delete()
     partidas = np.vectorize(lambda linha, atendimento, carro, partida_prevista, partida_realizada, sentido: Partida(
         linha=dic_linhas[int(linha)],
         atendimento=atendimento,
         carro=dic_carros[str(carro)],
         horario_prevista_terminal=maceio_tz.localize(pd.to_datetime(partida_prevista)),
         horario_realizada_terminal=maceio_tz.localize(pd.to_datetime(partida_realizada)),
-        sentido=sentido
+        sentido=sentido,
+        
     ))(
         df2.LINHA.values,
         df2.linha.values,
@@ -105,29 +107,33 @@ def create_viagens(df):
 
     dic_partidas = {(int(p.linha.numero), p.carro.numero, pd.to_datetime(p.horario_prevista_terminal).strftime('%d/%m/%Y'), pd.to_datetime(p.horario_prevista_terminal).strftime('%H:%M')):p for p in Partida.objects.select_related().all()}
     print(list(dic_partidas.keys())[0])
+    cartoes_existentes = Cartao.objects.all().values_list('numero', flat=True)
+    df1_ = df1[~df1.CARTAO.isin(cartoes_existentes)]
     cartoes = np.vectorize(lambda numero: Cartao(
         numero=numero,
         tipo_id=1,
     ))(
-        df1.CARTAO.unique(),
+        df1_.CARTAO.unique(),
     )
     Cartao.objects.bulk_create(list(cartoes))
     dic_cartaos = {p.numero:p for p in Cartao.objects.select_related().all()}
     #print(dic_cartaos)
     dic_pontos = {p.codigo_cittamobi:p for p in PontoPorEmpresa.objects.select_related().all()}
     print(dic_pontos)
-    viagens = np.vectorize(lambda linha, carro, horario, partida, cartao, ponto_embarque: ViagemDePassageiro(
+    viagens = np.vectorize(lambda linha, carro, horario, partida, cartao, ponto_embarque, valor: ViagemDePassageiro(
         partida_embarque=dic_partidas.get((int(linha), str(carro), pd.to_datetime(partida).strftime('%d/%m/%Y'), pd.to_datetime(partida).strftime('%H:%M'))),
         horario=maceio_tz.localize(pd.to_datetime(horario)),
         ponto_embarque=dic_pontos.get(ponto_embarque),
         cartao=dic_cartaos[cartao],
+        valor=valor
     ))(
-        df1.LINHA.values,
-        df1.CARRO.values,
-        df1.HORARIO.values,
-        df1.partida_prevista.values,
-        df1.CARTAO.values,
-        df1.station.values,
+        df.LINHA.values,
+        df.CARRO.values,
+        df.HORARIO.values,
+        df.partida_prevista.values,
+        df.CARTAO.values,
+        df.station.values,
+        df.VALOR.values
     )
 
     ViagemDePassageiro.objects.bulk_create(list(viagens))
@@ -156,7 +162,7 @@ df_pass = pd.concat(dfs, ignore_index=True)
 dfs = None
 df = None
 
-print(len(df_pass.partida.unique()))
+print(len(df_pass.partida_prevista.unique()))
 print(df_pass.count())
 df_pass.linha
 
@@ -165,5 +171,5 @@ df_pass.linha
 create_viagens(df_pass)
 print('Dados de passageiros finalizados')
 print('Criando ordem dos pontos')
-from read_stop_orders import *
+#from read_stop_orders import *
 print('\n\n\n\n------------------\n\nFinalizado!\n')
