@@ -85,17 +85,19 @@ def create_viagens(df):
     maceio_tz = pytz.timezone("UTC")
 
     Partida.objects.all().delete()
-    partidas = np.vectorize(lambda linha, atendimento, carro, horario, sentido: Partida(
+    partidas = np.vectorize(lambda linha, atendimento, carro, partida_prevista, partida_realizada, sentido: Partida(
         linha=dic_linhas[int(linha)],
         atendimento=atendimento,
         carro=dic_carros[str(carro)],
-        horario_prevista_terminal=maceio_tz.localize(pd.to_datetime(horario)),
+        horario_prevista_terminal=maceio_tz.localize(pd.to_datetime(partida_prevista)),
+        horario_realizada_terminal=maceio_tz.localize(pd.to_datetime(partida_realizada)),
         sentido=sentido
     ))(
         df2.LINHA.values,
         df2.linha.values,
         df2.CARRO.values,
-        df2.partida.values,
+        df2.partida_prevista.values,
+        df2.partida_realizada.values,
         df2.sentido.values,
     )
     Partida.objects.bulk_create(list(partidas))
@@ -123,7 +125,7 @@ def create_viagens(df):
         df1.LINHA.values,
         df1.CARRO.values,
         df1.HORARIO.values,
-        df1.partida.values,
+        df1.partida_prevista.values,
         df1.CARTAO.values,
         df1.station.values,
     )

@@ -31,9 +31,14 @@ def get_via_pass(cartao, horario):
                 return 'erro'
 
 
-def get_partida_pass(cartao, horario):
+def get_partida_prevista_pass(cartao, horario):
         try:
-                return LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))]['partida']
+                return LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))]['partida_prevista']
+        except:
+                return 'erro'
+def get_partida_realizada_pass(cartao, horario):
+        try:
+                return LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))]['partida_realizada']
         except:
                 return 'erro'
 def get_sentido_pass(cartao, horario):
@@ -87,7 +92,7 @@ except:
         passa = passa[passa['SITUACAO'] == 'Ok']
         print(passa['SITUACAO'])
         
-        passa = passa.loc[passa.LINHA.astype(int).isin([57, 58, 65, 68, 108, 711, 712, 715, 716]), :]
+        passa = passa.loc[passa.LINHA.astype(int).isin([51, 57, 58, 65, 68, 69, 108, 711, 712, 715, 716]), :]
         
         try:
             print('No try:')
@@ -177,7 +182,7 @@ except:
                                 
                                 try:
                                         l = dep.iloc[dep.index.get_loc(pd.to_datetime(horario), method='nearest', tolerance=pd.Timedelta('10Min'))]
-                                        LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))] = {'linha': l['atendimento'], 'partida': l['hora_prevista'], 'direction': l['direction_geral'], 'stop': l['stop_id'], 'via': ''}
+                                        LOCAL_FROM_PASS[(cartao, pd.to_datetime(horario))] = {'linha': l['atendimento'], 'partida_prevista': l['hora_prevista'], 'partida_realizada': l['HORA PARTIDA'],'direction': l['direction_geral'], 'stop': l['stop_id'], 'via': ''}
                                         achou_algum = True
                                 except:
                                         carros_com_erro.append((str(carro), str(pd.to_datetime(horario).day)))
@@ -188,7 +193,9 @@ except:
 
                 passa1['station'] = np.vectorize(get_local_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
                 passa1['linha'] = np.vectorize(get_linha_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
-                passa1['partida'] = np.vectorize(get_partida_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
+                passa1['partida_prevista'] = np.vectorize(get_partida_prevista_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
+                passa1['partida_realizada'] = np.vectorize(get_partida_realizada_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
+                #passa1['partida'] = np.vectorize(get_partida_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
                 passa1['sentido'] = np.vectorize(get_sentido_pass)(passa1['CARTAO'].values, passa1['HORARIO'].values)
                 
                 passa1['via'] = ''
