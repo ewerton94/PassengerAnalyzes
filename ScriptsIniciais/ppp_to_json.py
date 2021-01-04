@@ -238,8 +238,8 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
         #df_final = df_final[df_final['line'].str.startswith('4006')]
         #df_base = df_base[df_base['number_line']=='4006']
         df_final['max_ponto'] =  df_final.groupby('atendimento')['ordem_ponto'].transform(np.max)
-        np.vectorize(lambda car, number_line, line, atendimento, direction, start, final, departure: DICT_DP.setdefault(car, []).append((
-            number_line, line, atendimento, direction, pd.to_datetime(start), pd.to_datetime(final), pd.to_datetime(departure))))(
+        np.vectorize(lambda car, number_line, line, atendimento, direction, start, final, departure, ciclo: DICT_DP.setdefault(car, []).append((
+            number_line, line, atendimento, direction, pd.to_datetime(start), pd.to_datetime(final), pd.to_datetime(departure), ciclo)))(
             df_base['car_number'].values,
             df_base['number_line'].values,
             df_base['name_line'].values,
@@ -248,6 +248,7 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
             df_base['fulfilled_date_time'].values,
             df_base['final_date_time'].values,
             df_base['expected_date_time'].values,
+            df_base['fulfilled_duration_total'].values,
             )
         new_dfs = []
         df_base= None
@@ -370,6 +371,7 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
                     r['DATAA'] = day
                     r['HORA PARTIDA'] = departure[4]
                     r['hora_prevista'] = departure[6]
+                    r['duracao_ciclo'] = departure[7]
                 
                     
                     
@@ -406,7 +408,7 @@ def create_json_ppp(files, df_row=None, df_first_work=None):
                         r = r.reset_index()
                         r['hora_prevista'] = departure[6]
                         
-                        r = r[['ordem_ponto', 'DATAA', 'HORA PARTIDA','hora_prevista', 'atendimento', 'data_chegada', 'data_saida', 'direction_geral', 'n_departure', 'company', 'number_line', 'name_line']]
+                        r = r[['ordem_ponto', 'DATAA', 'HORA PARTIDA','hora_prevista', 'atendimento', 'data_chegada', 'data_saida', 'direction_geral', 'n_departure', 'company', 'number_line', 'name_line', 'duracao_ciclo']]
                         r['stop_id'] = stop_id
                         r['car'] = car
                         
