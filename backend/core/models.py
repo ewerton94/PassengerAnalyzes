@@ -36,6 +36,7 @@ class Empresa(models.Model):
     lote = models.CharField(max_length=500)
     abreviacao = models.CharField(max_length=500)
     ativa = models.BooleanField(default=True)
+    valor_km = models.FloatField(default=0)
 
     def __str__(self):
         return self.nome_oficial
@@ -52,7 +53,10 @@ class PontoPorEmpresa(models.Model):
 class Linha(models.Model):
     numero = models.CharField(max_length=500)
     nome = models.CharField(max_length=500)
+    eixo = models.CharField(max_length=500, default='')
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
+    km_ida = models.FloatField(default=0)
+    km_volta = models.FloatField(default=0)
 
     def __str__(self):
         return self.nome
@@ -81,6 +85,7 @@ class Partida(models.Model):
     real = models.BooleanField(default=True)
 
 class ViagemDePassageiro(models.Model):
+    linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='viagens_de_passageiros', null=True, blank=True)
     cartao = models.ForeignKey(Cartao, on_delete=models.CASCADE, related_name='viagens_de_passageiros')
     ponto_embarque = models.ForeignKey(PontoPorEmpresa, on_delete=models.CASCADE, related_name='embarques', null=True, blank=True)
     ponto_desembarque = models.ForeignKey(PontoPorEmpresa, on_delete=models.CASCADE, related_name='desembarques', null=True, blank=True)
