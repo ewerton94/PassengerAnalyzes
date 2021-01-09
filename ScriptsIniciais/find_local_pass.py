@@ -93,11 +93,13 @@ except:
         
         #passa = pd.read_excel('ppp/movimento_linha_716_160519.xls', sheet_name=None)
         passa = pd.read_pickle('../Resultados/'+legenda_contexto+'/passageiros.zip', compression='zip')
-        print(passa['SITUACAO'] == 'Ok')
-        passa = passa[passa['SITUACAO'] == 'Ok']
+        
+        print(passa['SITUACAO'].isin(['Ok', 'OK', 'ok']))
+        passa = passa[passa['SITUACAO'].isin(['Ok', 'OK', 'ok'])]
         print(passa['SITUACAO'])
         
         passa = passa.loc[passa.LINHA.astype(int).isin([51, 57, 58, 65, 68, 69, 108, 711, 712, 715, 716]), :]
+        print(passa.TIPO.unique())
         
         try:
             print('No try:')
@@ -136,6 +138,7 @@ except:
                 print(linha)
                 passa1 = passa.copy()
                 passa1 = passa1[passa1['LINHA'].astype(int)==int(linha)]
+                print(passa1.TIPO.unique())
                 
                 carros = set(passa1['CARRO'].values)
                 print(carros)

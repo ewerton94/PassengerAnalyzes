@@ -8,6 +8,7 @@ df = pd.read_pickle('../Resultados/'+legenda_contexto+'/stops .zip', compression
 dic = df.to_dict('index')
 dic = {('%03i'%int(k[0]), k[1], k[2]): [e for e in list(v.values()) if not e is None] for k,v in dic.items()}
 ordens = []
+
 for key, pontos in dic.items():
     for i, ponto in enumerate(pontos):
         try:

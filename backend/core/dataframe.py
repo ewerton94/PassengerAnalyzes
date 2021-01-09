@@ -46,8 +46,11 @@ class CalcularDesembarque(BaseData):
 
     def calcular(self):
         #self.queryset = self.queryset.filter(calculou_ponto_desembarque=False)
+        self.queryset = self.queryset(cartao__tipo__tipo="BOTOEIRAS", partida_embarque__isnull=False)
         if self.queryset.exists():
+            
             df_ = self.get_df()
+
             df_.columns = self.names
             df_ = df_.sort_values(by=['cartao', 'horario'])
             for linha, df in df_.groupby('linha'):
@@ -77,13 +80,13 @@ class CalcularDesembarque(BaseData):
                 df['next_ordem'] = np.vectorize(get_order)(dic_ordem, df['next_ponto_id'].astype(int).values, df['linha'].values, df['atendimento'].values, df['sentido'].values)
                 dic_pontos_ordem = {p: o for p, o in zip(df['pe_id'], df['ordem'])}
                 dic_pontos = {p.id: (p.lat, p.lon) for p in Ponto.objects.filter(id__in=df['ponto_id'].values)}
-                dic_coordenadas = {(lat, lon, c): id  for id, lat, lon, c in PontoPorEmpresa.objects.all().values_list('id', 'ponto__lat', 'ponto__lon', 'empresa_id').distinct()}
+                dic_coordenadas = {(lat, lon, c): id  for id, lat, lon, c in PontoPorEmpresa.objects.filter(ponto_id__in=df['ponto_id'].values).values_list('id', 'ponto__lat', 'ponto__lon', 'empresa_id').distinct()}
                 print('Carregou dicionários')
                 #dic_coordenadas_ordem = {(p.lat, p.lon): p.id  for p in Ponto.objects.all()}
                 df_pontos = df[['ponto_id', 'ordem', 'next_ponto_id', 'next_ordem']]
                 df_pontos.loc[:, 'coordenadas']=df_pontos['ponto_id'].map(dic_pontos)
                 #df_pontos = df_pontos.drop_duplicates(subset=['ponto_id', 'ordem', 'next_ponto_id', 'next_ordem'])
-                partida_embarques = Partida.objects.all().values_list('id', 'horario_prevista_terminal', 'carro_id')
+                partida_embarques = Partida.objects.filter(linha_id=linha).values_list('id', 'horario_prevista_terminal', 'carro_id')
                 partida_embarques = pd.DataFrame(list(partida_embarques), columns=['id', 'partida_embarque', 'carro'])
                 partida_embarques = partida_embarques.sort_values(by=['carro', 'partida_embarque'])
                 partida_embarques['next_partida_embarque'] = partida_embarques['id'].shift(-1)
@@ -94,7 +97,6 @@ class CalcularDesembarque(BaseData):
                 #print(partida_embarques)
                 nex_partida_embarque = {}
                 print(df)
-                
                 df = df[['id', 'ordem', 'next_ponto_id', 'next_ordem', 'partida_embarque', 'sentido']]
                 df.loc[:, 'coordenadas'] = df['next_ponto_id'].map(dic_pontos)
                 df['closest'] = [closest_point(x, list(df_pontos[df_pontos['ordem']>omin]['coordenadas'])) for x, omin in zip(df['coordenadas'], df['ordem'])]
@@ -247,11 +249,13 @@ class BoxPlotPorTrecho(BaseData):
 
     tipo_ponto = 'ponto_embarque__ponto__trecho__nome'
     
-    columns = ['id', 'ponto_embarque__ponto__trecho__nome', 'partida_embarque_id', 'ponto_embarque__ponto_id', 'partida_embarque__sentido']
+    columns = ['id', 'linha_id', 'ponto_embarque__ponto__trecho__nome', 'partida_embarque_id', 'ponto_embarque__ponto_id', 'partida_embarque__sentido']
 
     def calcular(self):
+        self.queryset = self.queryset.filter(partida_embarque__isnull=False)
         df = self.get_df()
-        ordem_ponto = {(p, s): o for p, o, s in OrdemPontosLinha.objects.select_related().all().values_list('ponto__trecho__nome', 'ordem', 'sentido').distinct()}
+        
+        ordem_ponto = {(p, s): o for p, o, s in OrdemPontosLinha.objects.select_related().filter(linha_id__in=df.linha_id.unique()).values_list('ponto__trecho__nome', 'ordem', 'sentido').distinct()}
         un = df[[self.tipo_ponto, 'partida_embarque__sentido']].drop_duplicates()
         #print(list(zip(df[self.tipo_ponto].values, df.partida_embarque__sentido.values)))
         print('Antes', self.tipo_ponto)
@@ -333,15 +337,16 @@ class SankeyOD(BaseData):
 
     tipo_ponto = 'ponto_embarque__ponto__trecho__nome'
     
-    columns = ['id', 'ponto_embarque__ponto__trecho__nome', 'ponto_desembarque__ponto__trecho__nome', 'partida_embarque_id', 'ponto_embarque__ponto_id', 'partida_embarque__sentido']
+    columns = ['id', 'linha_id', 'ponto_embarque__ponto__trecho__nome', 'ponto_desembarque__ponto__trecho__nome', 'partida_embarque_id', 'ponto_embarque__ponto_id', 'partida_embarque__sentido']
 
     def calcular(self):
         df = self.get_df()
-        ordem_ponto = {(p, s): o for p, o, s in OrdemPontosLinha.objects.select_related().all().values_list('ponto__trecho__nome', 'ordem', 'sentido').distinct()}
+        ordem_ponto = {(p, s): o for p, o, s in OrdemPontosLinha.objects.select_related().filter(linha_id__in=df.linha_id.unique()).values_list('ponto__trecho__nome', 'ordem', 'sentido').distinct()}
         un = df[self.tipo_ponto].unique()
         pontos = list([ee for ee in sorted(list(un), key=lambda x: get_order_trecho_ida(ordem_ponto, x)) if not ee is None])
         df.loc[:, 'quantidade'] = 1
         df = df.groupby(['ponto_embarque__ponto__trecho__nome', 'ponto_desembarque__ponto__trecho__nome']).count().reset_index()
+        df = df[df['ponto_embarque__ponto__trecho__nome'] != df['ponto_desembarque__ponto__trecho__nome']]
         df['O'] = df['ponto_embarque__ponto__trecho__nome'] + ' (O)'
         df['D'] = df['ponto_desembarque__ponto__trecho__nome']+ ' (D)'
         df['ordemO'] = df['ponto_embarque__ponto__trecho__nome'].apply(lambda x: get_order_trecho_ida(ordem_ponto, x))
@@ -463,7 +468,7 @@ class MapaCalorEmbarque(BoxPlotPorTrecho):
 class ViagensVazias(BaseData):
 
     
-    columns = ['ponto_embarque__ponto__trecho__nome', 'partida_embarque__horario_prevista_terminal', 'partida_embarque__sentido']
+    columns = ['ponto_embarque__ponto__codigo', 'ponto_embarque__ponto__trecho__nome', 'partida_embarque__horario_prevista_terminal', 'partida_embarque__sentido', 'linha__numero', 'partida_embarque__somente_cartao', 'linha__eixo', 'linha__km_ida', 'linha__km_volta', 'linha__empresa__valor_km', 'valor']
     def calcular(self):
         self.queryset = self.queryset.filter(partida_desembarque__isnull=False)
         df = self.get_df()
@@ -474,16 +479,21 @@ class DadosPorHoraDoDia(BaseData):
     columns = ['id', 'horario']
 
     def calcular(self):
+        #self.queryset = self.queryset.filter(cartao__tipo__tipo='BOTOEIRAS')
         df = self.get_df()
         df.index = pd.to_datetime(df['horario'])
         df = df.groupby(pd.Grouper(freq='10Min')).count()
+        print(df.head(15))
         df['time'] = (pd.to_datetime(df.index) + pd.Timedelta(hours=-3)).time
+        print(df.head(15))
         df = df.groupby('time').mean()
+        print(df.head(15))
         df = df[['id',]]
+        print(df.id.values)
         df.index = ('2010-01-01 '+df.index.to_series().astype(str)).apply(pd.Timestamp)
         df.columns = ['Passageiros']
         df = self.ordenar_index(df, lambda x: x)
-        return self.grafico_de_area(df)
+        return self.grafico_de_area(df.astype(int))
 
     def ordenar_index(self, df, key):
         df['sort_param'] = np.vectorize(key)(df.index)
