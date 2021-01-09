@@ -7,12 +7,14 @@
     </q-card-section>
 
     <q-card-section v-if="graficos[tipoGrafico] && dadosObtidos" class="q-pt-none">
-      <vue-google-heatmap :points="graficos[tipoGrafico].data"
-                      :lat="graficos[tipoGrafico].lat"
+      <heat-map
+    :points="graficos[tipoGrafico].data"
+    :lat="graficos[tipoGrafico].lat"
                       :lng="graficos[tipoGrafico].lng"
                       :initial-zoom="11"
                       :width="'100%'"
-                      :height="350" />
+                      :height="350"
+  />
     </q-card-section>
     <q-card-section v-if="!dadosObtidos" class="q-pt-none">
       <q-skeleton height="300px" square />
@@ -22,9 +24,11 @@
 </template>
 
 <script>
+// import { GChart } from 'vue-google-charts'
+import HeatMap from './HeatMap'
 import { mapState, mapActions, mapMutations } from 'vuex'
 export default {
-  name: 'MapaCalor',
+  name: 'PassageiroPorDia',
 
   data: function () {
     return {
@@ -32,6 +36,9 @@ export default {
       key: 0
 
     }
+  },
+  components: {
+    HeatMap
   },
   computed: {
     ...mapState('Core', ['graficos', 'extraFiltro'])
@@ -43,7 +50,6 @@ export default {
 
     )
   },
-
   methods: {
     ...mapActions('Core', ['obterDadosGrafico']),
     ...mapMutations('Core', ['ADD_NEW_EXTRA_FILTRO']),
@@ -55,8 +61,7 @@ export default {
       extraFiltro.tipo_grafico = this.tipoGrafico
       await this.obterDadosGrafico(extraFiltro)
       this.dadosObtidos = true
-      this.$heatmap
-        .this.key = this.key + 1
+      this.key = this.key + 1
       // console.log(this.graficos)
     }
   },

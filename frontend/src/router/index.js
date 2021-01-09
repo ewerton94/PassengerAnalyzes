@@ -7,8 +7,6 @@ Vue.use(VueRouter)
 
 import VueGoogleCharts from 'vue-google-charts'
 
-Vue.use(VueGoogleCharts)
-
 import VueApexCharts from 'vue-apexcharts'
 Vue.use(VueApexCharts)
 try {
@@ -21,6 +19,12 @@ try {
   console.log('GoogleMapsKey Interna')
   console.log(GoogleMapsKey)
 }
+Vue.use(VueGoogleCharts, {
+  load: {
+    key: GoogleMapsKey.GoogleMapsKey,
+    libraries: ['places', 'visualization', 'sankey']
+  }
+})
 
 import VueGoogleHeatmap from 'vue-google-heatmap'
 
