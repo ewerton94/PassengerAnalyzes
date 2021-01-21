@@ -34,15 +34,9 @@ export default {
   computed: {
     ...mapState('Core', ['graficos', 'extraFiltro'])
   },
+
   created () {
-
-  },
-  mounted () {
-    setTimeout(() => {
-      this.start()
-    }, this.timeout * 1000
-
-    )
+    this.start()
   },
   onEnd: function () {
     // when you want to reload the component just make `loaded = false`

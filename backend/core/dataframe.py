@@ -45,8 +45,8 @@ class CalcularDesembarque(BaseData):
     names = ['id', 'cartao', 'partida_embarque', 'sentido', 'horario', 'ponto', 'linha', 'atendimento', 'ponto_id', 'pe_id']
 
     def calcular(self):
-        #self.queryset = self.queryset.filter(calculou_ponto_desembarque=False)
-        self.queryset = self.queryset(cartao__tipo__tipo="BOTOEIRAS", partida_embarque__isnull=False)
+        self.queryset = self.queryset.filter(calculou_ponto_desembarque=False)
+        self.queryset = self.queryset.filter(cartao__tipo__tipo="BOTOEIRAS", partida_embarque__isnull=False)
         if self.queryset.exists():
             
             df_ = self.get_df()
@@ -223,6 +223,9 @@ class DadosPorDiaDaSemana(BaseData):
         return {
             'chartOptions': {
                 'chart': {
+                    'animations': {
+                        'enabled': False
+                    },
                     'id': 'vuechart-example'
                 },
                 'xaxis': {'categories': df.index}
@@ -509,6 +512,9 @@ class DadosPorHoraDoDia(BaseData):
         return {
             'chartOptions': {
                 'chart': {
+                    'animations': {
+                        'enabled': False
+                    },
                     'id': 'area-datetime',
                     'type': 'area',
                     'height': 350,

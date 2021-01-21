@@ -36,12 +36,8 @@ export default {
   computed: {
     ...mapState('Core', ['graficos', 'extraFiltro'])
   },
-  mounted () {
-    setTimeout(() => {
-      this.start()
-    }, this.timeout * 1000
-
-    )
+  created () {
+    this.start()
   },
 
   methods: {

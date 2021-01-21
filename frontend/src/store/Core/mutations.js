@@ -36,6 +36,10 @@ const ADD_NEW_EXTRA_FILTRO = (state, { newExtraFiltroKey, newExtraFiltroValue })
   state.extraFiltro[newExtraFiltroKey] = newExtraFiltroValue
   ICREMENT_GERALKEY(state, newExtraFiltroKey)
 }
+const ADD_EXTRA_FILTRO_INICIAL = (state, { newExtraFiltroKey, newExtraFiltroValue }) => {
+  state.extraFiltro[newExtraFiltroKey] = newExtraFiltroValue
+  // ICREMENT_GERALKEY(state, newExtraFiltroKey)
+}
 
 export {
   SET_LINHAS,
@@ -44,5 +48,6 @@ export {
   ICREMENT_GERALKEY,
   SET_EXTRA_FILTRO,
   SET_ENDED,
-  ADD_NEW_EXTRA_FILTRO
+  ADD_NEW_EXTRA_FILTRO,
+  ADD_EXTRA_FILTRO_INICIAL
 }

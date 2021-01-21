@@ -67,7 +67,7 @@ export default {
       )
     }
   },
-  mounted () {
+  created () {
     this.$nextTick(() => {
       return this.$gmapApiPromiseLazy().then(() => {
         // eslint-disable-next-line

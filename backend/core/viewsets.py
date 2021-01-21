@@ -15,6 +15,10 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+
 '''
 As classes desse arquivo realizam um query (queryset = Model.objects.all()) dos Models e retornar essa requisição para o usuário
 no formato serializado (serializer_class = ModelSerializer) definido em ./serializers.py.
@@ -59,7 +63,9 @@ class LinhaViewSet(viewsets.ModelViewSet):
         print(data)
         
         return Response(status=status.HTTP_201_CREATED)
-    
+
+    @method_decorator(cache_page(60*60*24))
+    #@method_decorator(vary_on_cookie)
     @action(detail=False,  methods=['get',])
     def grafico(self, request, pk=None):
         ''''''
@@ -114,7 +120,10 @@ class LinhaViewSet(viewsets.ModelViewSet):
 
 
         return qs
- 
+
+
+    @method_decorator(cache_page(60*60*24))
+    #@method_decorator(vary_on_cookie) 
     @action(detail=False,  methods=['get',])
     def detalhar(self, request, pk=None):
         '''

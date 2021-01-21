@@ -43,12 +43,10 @@ export default {
   computed: {
     ...mapState('Core', ['graficos', 'extraFiltro'])
   },
-  mounted () {
-    setTimeout(() => {
+  created () {
+    
       this.start()
-    }, this.timeout * 1000
-
-    )
+    
   },
   methods: {
     ...mapActions('Core', ['obterDadosGrafico']),

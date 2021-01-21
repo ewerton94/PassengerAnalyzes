@@ -33,7 +33,7 @@
           Menu
         </q-item-label>
         <q-list>
-        <q-item clickable v-close-popup href="/">
+        <q-item clickable v-close-popup to="/">
           <q-item-section avatar>
           <q-icon color="primary" name="dashboard" />
         </q-item-section>
