@@ -2,55 +2,23 @@
   <div >
     <q-page class="q-pa-sm">
       <q-card class="bg-transparent no-shadow no-border">
-
         <q-card-section class="q-pa-none">
           <Filtro/>
         </q-card-section>
       </q-card>
       <div :key="geralKey">
-
       <q-card  class="bg-transparent no-shadow no-border">
-
         <q-card-section class="q-pa-none">
           <div class="row q-col-gutter-sm">
-            <CardResumo
-              itemColor="#5064b5"
-              iconColor="#3e51b5"
-              iconName="fas fa-bus"
-              :title="linha.lote"
-              :subtitle="linha.empresa"
-
-            />
-            <CardResumo
-              itemColor="#f37169"
-              iconColor="#f34636"
-              iconName="fas fa-route"
-              :title="linha.numero"
-              :subtitle="linha.linha"
-
-            />
-            <CardResumo
-              itemColor="#ea6a7f"
-              iconColor="#ea4b64"
-              iconName="fas fa-user"
-              :title="linha.passageiros"
-              subtitle="Passageiros"
-
-            />
-            <CardResumo
-              itemColor="#a270b1"
-              iconColor="#9f52b1"
-              iconName="bar_chart"
-              :title="linha.viagens"
-              subtitle="Viagens"
-
-            />
+            <CardResumo itemColor="#5064b5" iconColor="#3e51b5" iconName="fas fa-bus" :title="linha.lote" :subtitle="linha.empresa"/>
+            <CardResumo itemColor="#f37169" iconColor="#f34636" iconName="fas fa-route" :title="linha.numero" :subtitle="linha.linha"/>
+            <CardResumo  itemColor="#ea6a7f"  iconColor="#ea4b64"  iconName="fas fa-user"  :title="linha.passageiros"  subtitle="Passageiros"/>
+            <CardResumo  itemColor="#a270b1"  iconColor="#9f52b1"  iconName="bar_chart"  :title="linha.viagens"  subtitle="Viagens"/>
           </div>
         </q-card-section>
       </q-card>
       <div class="row">
         <div class="col-12 col-md-6 ">
-
         <GraficoGeral
           class="my-card   q-ma-sm"
           tipoGrafico = "DadosPorDiaDaSemana"
@@ -70,6 +38,7 @@
           subtitle = "Dados por hora do dia"
           :timeout="1"
         ></GraficoGeral>
+
         </div>
         <div class="col-12 col-md-12 ">
 
@@ -142,9 +111,9 @@ export default {
   },
   methods: {
     ...mapActions('Core', ['detalharLinhas']),
-    ...mapMutations('Core', ['ADD_NEW_EXTRA_FILTRO', 'SET_ENDED']),
+    ...mapMutations('Core', ['ADD_EXTRA_FILTRO_INICIAL', 'SET_ENDED']),
     async getInfoLinhas () {
-      await this.ADD_NEW_EXTRA_FILTRO({ newExtraFiltroKey: 'linhas', newExtraFiltroValue: this.$router.currentRoute.query.linhas })
+      await this.ADD_EXTRA_FILTRO_INICIAL({ newExtraFiltroKey: 'linhas', newExtraFiltroValue: this.$router.currentRoute.query.linhas })
       await this.detalharLinhas(this.extraFiltro)
     }
   },
