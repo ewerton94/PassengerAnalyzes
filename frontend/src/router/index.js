@@ -9,16 +9,9 @@ import VueGoogleCharts from 'vue-google-charts'
 
 import VueApexCharts from 'vue-apexcharts'
 Vue.use(VueApexCharts)
-try {
-  var GoogleMapsKey = require('boot/secret')
-  console.log('GoogleMapsKey Externa')
 
-  console.log(GoogleMapsKey.GoogleMapsKey)
-} catch (e) {
-  const GoogleMapsKey = { GoogleMapsKey: 'INSIRA SUA KEY' }
-  console.log('GoogleMapsKey Interna')
-  console.log(GoogleMapsKey)
-}
+var GoogleMapsKey = process.env.GoogleMapsKey
+
 Vue.use(VueGoogleCharts, {
   load: {
     key: GoogleMapsKey.GoogleMapsKey,
