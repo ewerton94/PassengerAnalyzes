@@ -9,3 +9,4 @@ Lixeira/*
 *.pyc
 *secret.py
 *secret.js
+*.env
