@@ -10,7 +10,7 @@ import VueGoogleCharts from 'vue-google-charts'
 import VueApexCharts from 'vue-apexcharts'
 Vue.use(VueApexCharts)
 
-var GoogleMapsKey = process.env.GoogleMapsKey
+var GoogleMapsKey = process.env.GoogleMapsKey.replace('"', '').replace("'", '')
 console.log('GoogleMapsKey')
 console.log(GoogleMapsKey)
 
