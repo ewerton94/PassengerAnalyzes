@@ -14,7 +14,7 @@ var GoogleMapsKey = process.env.GoogleMapsKey
 
 Vue.use(VueGoogleCharts, {
   load: {
-    key: GoogleMapsKey.GoogleMapsKey,
+    key: GoogleMapsKey,
     libraries: ['places', 'visualization', 'sankey']
   }
 })
@@ -22,7 +22,7 @@ Vue.use(VueGoogleCharts, {
 import VueGoogleHeatmap from 'vue-google-heatmap'
 
 Vue.use(VueGoogleHeatmap, {
-  apiKey: GoogleMapsKey.GoogleMapsKey
+  apiKey: GoogleMapsKey
 })
 Vue.component('apexchart', VueApexCharts)
 import { library } from '@fortawesome/fontawesome-svg-core'
