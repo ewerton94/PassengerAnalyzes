@@ -2,3 +2,8 @@
   base    = "frontend"
   publish = "dist/"
   command = "node ./scripts/create-env.js && quasar build"
+
+
+[[redirects]]
+  from = "/"
+  to = "subdirectory/"
