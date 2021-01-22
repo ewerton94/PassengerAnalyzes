@@ -11,6 +11,8 @@ import VueApexCharts from 'vue-apexcharts'
 Vue.use(VueApexCharts)
 
 var GoogleMapsKey = process.env.GoogleMapsKey
+console.log('GoogleMapsKey')
+console.log(GoogleMapsKey)
 
 Vue.use(VueGoogleCharts, {
   load: {
