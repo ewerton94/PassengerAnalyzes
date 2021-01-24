@@ -1,3 +1,9 @@
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'conf.settings')
+
+import django
+django.setup()
+
 import pandas as pd
 import numpy as np
 from core.models import *
@@ -101,6 +107,7 @@ def create_viagens(df):
         df2.sentido.values,
     )
     Partida.objects.bulk_create(list(partidas))
+    print('Partidas Criadas')
 
 
     dic_partidas = {(int(p.linha.numero), p.carro.numero, pd.to_datetime(p.horario_prevista_terminal).strftime('%d/%m/%Y'), pd.to_datetime(p.horario_prevista_terminal).strftime('%H:%M')):p for p in Partida.objects.select_related().all()}
@@ -137,25 +144,29 @@ def create_viagens(df):
     print(dic_pontos)
     get__data_str_datetime_or_none = lambda partida: pd.to_datetime(partida).strftime('%d/%m/%Y') if not pd.isnull(partida) else ''
     get__hora_str_datetime_or_none = lambda partida: pd.to_datetime(partida).strftime('%H:%M') if not pd.isnull(partida) else ''
-    viagens = np.vectorize(lambda linha, carro, horario, partida, cartao, ponto_embarque, valor: ViagemDePassageiro(
-        linha=dic_linhas[int(linha)],
-        partida_embarque=dic_partidas.get((int(linha), str(carro), get__data_str_datetime_or_none(partida), get__hora_str_datetime_or_none(partida))),
-        horario=hora_or_none(horario),
-        ponto_embarque=dic_pontos.get(ponto_embarque),
-        cartao=dic_cartaos[cartao],
-        valor=valor
-    ))(
-        df.LINHA.values,
-        df.CARRO.values,
-        df.HORARIO.values,
-        df.partida_prevista.values,
-        df.CARTAO.values,
-        df.station.values,
-        df.VALOR.values
-    )
+    
+    for i, df_ in df.groupby(['LINHA', 'CARRO']):
+        print(i)
+        viagens = np.vectorize(lambda linha, carro, horario, partida, cartao, ponto_embarque, valor: ViagemDePassageiro(
+            linha=dic_linhas[int(linha)],
+            partida_embarque=dic_partidas.get((int(linha), str(carro), get__data_str_datetime_or_none(partida), get__hora_str_datetime_or_none(partida))),
+            horario=hora_or_none(horario),
+            ponto_embarque=dic_pontos.get(ponto_embarque),
+            cartao=dic_cartaos[cartao],
+            valor=valor
+        ))(
+            df.LINHA.values,
+            df.CARRO.values,
+            df.HORARIO.values,
+            df.partida_prevista.values,
+            df.CARTAO.values,
+            df.station.values,
+            df.VALOR.values
+        )
 
-    ViagemDePassageiro.objects.bulk_create(list(viagens))
-    print(ViagemDePassageiro.objects.all())
+
+        ViagemDePassageiro.objects.bulk_create(list(viagens))
+        print('Criou')
 
     
 
