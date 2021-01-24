@@ -45,9 +45,13 @@ class CalcularDesembarque(BaseData):
     names = ['id', 'cartao', 'partida_embarque', 'sentido', 'horario', 'ponto', 'linha', 'atendimento', 'ponto_id', 'pe_id']
 
     def calcular(self):
-        self.queryset = self.queryset.filter(calculou_ponto_desembarque=False)
-        self.queryset = self.queryset.filter(cartao__tipo__tipo="BOTOEIRAS", partida_embarque__isnull=False)
+        #self.queryset = self.queryset.filter(calculou_ponto_desembarque=False)
+        print('self.queryset', self.queryset.count())
+        self.queryset = self.queryset.filter(partida_embarque__isnull=False).exclude(cartao__tipo__tipo="BOTOEIRAS")
+        print('self.queryset', self.queryset.count())
+        print('Começando desembarque')
         if self.queryset.exists():
+            print('Existe')
             
             df_ = self.get_df()
 
