@@ -142,8 +142,9 @@ class CalcularDesembarque(BaseData):
                     '''
 
                     v.partida_desembarque_id = int(df.loc[df.id == v.id, 'partida_embarque'])
+                    v.save()
                 #errrr
-                bulk_update(vs)
+                #bulk_update(vs)
                 self.queryset.update(calculou_ponto_desembarque=True)
             return True
         else: 
