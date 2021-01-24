@@ -60,7 +60,7 @@ class LinhaViewSet(viewsets.ModelViewSet):
         Criar uma Linha e salvar no banco.
         '''    
         data = request.data
-        print(data)
+        #print(data)
         
         return Response(status=status.HTTP_201_CREATED)
 
@@ -80,35 +80,35 @@ class LinhaViewSet(viewsets.ModelViewSet):
         viagens = ViagemDePassageiro.objects.filter(linha__numero__in=linhas, horario__year__gte=2020)
         viagens = self.qs_extra_filtro(viagens, request.GET)
         r = eval(tipo_grafico+'(viagens).calcular()')
-        print('\n\n-------\n', tipo_grafico, datetime.now() - d, '\n----')
+        #print('\n\n-------\n', tipo_grafico, datetime.now() - d, '\n----')
         return Response(r)
 
     @action(detail=False,  methods=['get',])
     def calcular_desembarque(self, request, pk=None):
+        #viagens = ViagemDePassageiro.objects.filter(partida_embarque__isnull=False, ponto_embarque__isnull=False)#partida_embarque__linha__numero__in=['716']
         viagens = ViagemDePassageiro.objects.filter(partida_embarque__isnull=False, ponto_embarque__isnull=False)#partida_embarque__linha__numero__in=['716']
         CalcularDesembarque(viagens).calcular()
-        CalcularLotacaoPorTrecho(viagens).calcular()
+        #CalcularLotacaoPorTrecho(viagens).calcular()
         return Response('ok')
 
     
     def qs_extra_filtro(self, qs, params):
         if 'data_inicial' in params and 'data_final' in params:
-            print(params.get('data_inicial'))
-            print(params.get('data_final'))
+            #print(params.get('data_inicial'))
+            #print(params.get('data_final'))
             qs = qs.filter(
                 partida_embarque__horario_prevista_terminal__date__gte=params.get('data_inicial'),
                 partida_embarque__horario_prevista_terminal__date__lte=params.get('data_final')
             )
-        if 'partida_inicial' in params and 'partida_final' in params:
-            print(params.get('partida_inicial'))
-            print(params.get('partida_final'))
+        if 'dias_da_semana' in params:
+            #print(params.get('dias_da_semana'))
+            #print(list(params.get('dias_da_semana').split(',')))
             qs = qs.filter(
-                partida_embarque__horario_prevista_terminal__time__gte=params.get('partida_inicial')+':00',
-                partida_embarque__horario_prevista_terminal__time__lte=params.get('partida_final')+':00'
+                partida_embarque__horario_prevista_terminal__date__week_day__in=list(params.get('dias_da_semana').split(',')),
             )
         if 'embarque_inicial' in params and 'embarque_final' in params:
-            print(params.get('embarque_inicial'))
-            print(params.get('embarque_final'))
+            #print(params.get('embarque_inicial'))
+            #print(params.get('embarque_final'))
             qs = qs.filter(
                 horario__time__gte=params.get('embarque_inicial'),
                 horario__time__lte=params.get('embarque_final')
@@ -129,7 +129,7 @@ class LinhaViewSet(viewsets.ModelViewSet):
         '''
         Criar uma Linha e salvar no banco.
         '''    
-        print(request.GET)
+        #print(request.GET)
         linhas = request.GET.get('linhas')
         if linhas is None:
             return Response(status=status.HTTP_201_CREATED)
@@ -153,7 +153,7 @@ class LinhaViewSet(viewsets.ModelViewSet):
             detail['lote'] = linha.empresa.lote
             detail['empresa'] = linha.empresa.nome_oficial
             
-        print(detail)
+        #print(detail)
 
         
         return Response(detail)

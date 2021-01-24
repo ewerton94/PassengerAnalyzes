@@ -71,58 +71,35 @@
       <q-btn-dropdown color="primary" class="col-12 col-md-12">
         <template v-slot:label>
           <div class="row items-center no-wrap">
-            <q-icon left name="timer" />
+            <q-icon left name="calendar_today" />
             <div class="text-center">
-              Faixa Horária de Partida<br /><small>Filtro por hora</small>
+              Dia da semana<br /><small>Filtro por dia</small>
             </div>
           </div>
         </template>
         <div class="col-12 q-ma-md">
-          <q-input
-            class="col-12 q-mt-md"
-            filled
-            label="Hora inicial"
-            v-model="filtrarHoraInicialPartida"
-            mask="time"
-          >
-            <template v-slot:append>
-              <q-icon name="timer" class="cursor-pointer">
-                <q-popup-proxy
-                  ref="qDateProxy"
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <q-time
-                    v-model="filtrarHoraInicialPartida"
-                    @input="() => $refs.qDateProxy.hide()"
-                  />
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-          <q-separator />
-          <q-input
-            class="col-12 q-mt-md"
-            filled
-            label="Hora final"
-            v-model="filtrarHoraFinalPartida"
-            mask="time"
-          >
-            <template v-slot:append>
-              <q-icon name="timer" class="cursor-pointer">
-                <q-popup-proxy
-                  ref="qDateProxy"
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <q-time
-                    v-model="filtrarHoraFinalPartida"
-                    @input="() => $refs.qDateProxy.hide()"
-                  />
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
+          <div class="row">
+          <q-checkbox class="col-12" v-model="filtrarDiasDaSemana" :val="1" label="Domingo" />
+          </div>
+          <div class="row">
+          <q-checkbox class="col-12" v-model="filtrarDiasDaSemana" :val="2" label="Segunda-Feira" />
+          </div>
+          <div class="row">
+          <q-checkbox class="col-12" v-model="filtrarDiasDaSemana" :val="3" label="Terça-Feira" />
+          </div>
+          <div class="row">
+          <q-checkbox class="col-12" v-model="filtrarDiasDaSemana" :val="4" label="Quarta-Feira" />
+          </div>
+          <div class="row">
+          <q-checkbox class="col-12" v-model="filtrarDiasDaSemana" :val="5" label="Quinta-Feira" />
+          </div>
+          <div class="row">
+          <q-checkbox class="col-12" v-model="filtrarDiasDaSemana" :val="6" label="Sexta-Feira" />
+          </div>
+          <div class="row">
+          <q-checkbox class="col-12" v-model="filtrarDiasDaSemana" :val="7" label="Sábado" />
+          </div>
+
         </div>
       </q-btn-dropdown>
       </div>
@@ -241,7 +218,7 @@ export default {
     return {
       filtrarDataInicial: null,
       filtrarDataFinal: null,
-      filtrarHoraInicialPartida: null,
+      filtrarDiasDaSemana: [],
       filtrarHoraInicialEmbarque: null,
       filtrarHoraFinalPartida: null,
       filtrarHoraFinalEmbarque: null,
@@ -270,14 +247,10 @@ export default {
           newExtraFiltroValue: this.filtrarDataFinal.replaceAll('/', '-')
         })
       }
-      if (this.filtrarHoraInicialPartida && this.filtrarHoraFinalPartida) {
+      if (this.filtrarDiasDaSemana.length) {
         await this.ADD_NEW_EXTRA_FILTRO({
-          newExtraFiltroKey: 'partida_inicial',
-          newExtraFiltroValue: this.filtrarHoraInicialPartida
-        })
-        await this.ADD_NEW_EXTRA_FILTRO({
-          newExtraFiltroKey: 'partida_final',
-          newExtraFiltroValue: this.filtrarHoraFinalPartida
+          newExtraFiltroKey: 'dias_da_semana',
+          newExtraFiltroValue: this.filtrarDiasDaSemana.join(',')
         })
       }
       if (this.filtrarHoraInicialEmbarque && this.filtrarHoraFinalEmbarque) {
