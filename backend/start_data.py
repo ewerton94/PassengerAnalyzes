@@ -155,13 +155,13 @@ def create_viagens(df):
             cartao=dic_cartaos[cartao],
             valor=valor
         ))(
-            df.LINHA.values,
-            df.CARRO.values,
-            df.HORARIO.values,
-            df.partida_prevista.values,
-            df.CARTAO.values,
-            df.station.values,
-            df.VALOR.values
+            df_.LINHA.values,
+            df_.CARRO.values,
+            df_.HORARIO.values,
+            df_.partida_prevista.values,
+            df_.CARTAO.values,
+            df_.station.values,
+            df_.VALOR.values
         )
 
 
@@ -192,7 +192,7 @@ for legenda_contexto in ['200', '3 a 10-10-2020']:
 df_tv = pd.concat(df_tvs, ignore_index=True)
 
 create_lines(df_tv)
-df_pontos = pd.read_excel('../ScriptsIniciais/base_pontos'+ pos +'.xlsx')
+df_pontos = pd.read_excel('../ScriptsIniciais/base_pontos'+ pos +'.xlsx', engine='openpyxl')
 print(df_pontos)
 create_pontos(df_pontos)
 print('Pontos Criados')
