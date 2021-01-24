@@ -1,0 +1,11 @@
+django==2.2
+psycopg2==2.8.4
+djangorestframework==3.10.3
+requests
+django-bulk-update
+django-rest-swagger
+django-simple-history
+django-cors-headers
+Pillow
+pdfkit
+django-filter
