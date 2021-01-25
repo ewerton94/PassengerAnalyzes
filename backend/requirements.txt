@@ -9,3 +9,5 @@ django-cors-headers
 Pillow
 pdfkit
 django-filter
+openpyxl
+xlrd
