@@ -41,6 +41,7 @@
             <q-item-label>Dashboard</q-item-label>
           </q-item-section>
         </q-item>
+        <!--
 
         <q-item clickable v-close-popup @click="calcularDesembarque">
           <q-item-section avatar>
@@ -49,7 +50,7 @@
           <q-item-section>
             <q-item-label>Calcular Desembarques</q-item-label>
           </q-item-section>
-        </q-item>
+        </q-item>-->
 
       </q-list>
 
