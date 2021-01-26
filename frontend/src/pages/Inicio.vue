@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapMutations } from 'vuex'
 export default {
   data: function () {
     return {
@@ -40,8 +40,10 @@ export default {
   },
   methods: {
     ...mapActions('Core', ['listarLinhas']),
+    ...mapMutations('Core', ['CLEAN_EXTRA_FILTRO']),
     async start () {
       await this.listarLinhas()
+      this.CLEAN_EXTRA_FILTRO()
       this.visible = false
     },
     enviarLinhas () {

@@ -31,6 +31,9 @@ const SET_EXTRA_FILTRO = (state, extraFiltro) => {
   state.extraFiltro = extraFiltro
   ICREMENT_GERALKEY(state, extraFiltro)
 }
+const CLEAN_EXTRA_FILTRO = (state) => {
+  state.extraFiltro = {}
+}
 
 const ADD_NEW_EXTRA_FILTRO = (state, { newExtraFiltroKey, newExtraFiltroValue }) => {
   state.extraFiltro[newExtraFiltroKey] = newExtraFiltroValue
@@ -49,5 +52,6 @@ export {
   SET_EXTRA_FILTRO,
   SET_ENDED,
   ADD_NEW_EXTRA_FILTRO,
-  ADD_EXTRA_FILTRO_INICIAL
+  ADD_EXTRA_FILTRO_INICIAL,
+  CLEAN_EXTRA_FILTRO
 }
