@@ -60,7 +60,19 @@ export default {
         const el = this.$refs[this.divId]
         // console.log('EL')
         // console.log(el)
-        Plotly.newPlot(el, this.graficos[this.tipoGrafico].data, this.graficos[this.tipoGrafico].layout)
+        console.log(this.graficos[this.tipoGrafico].layout)
+        var layout = this.graficos[this.tipoGrafico].layout
+        if (this.$q.screen.lt.md) {
+          layout.showlegend = false
+          layout.margin = {
+            l: 0,
+            r: 0,
+            b: 0,
+            t: 0,
+            pad: 4
+          }
+        }
+        Plotly.newPlot(el, this.graficos[this.tipoGrafico].data, layout, { responsive: true })
       // this.key = this.key + 1
       })
 
