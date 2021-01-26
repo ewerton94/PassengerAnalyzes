@@ -6,7 +6,7 @@
 
     </q-card-section>
 
-    <q-card-section v-if="graficos[tipoGrafico] && dadosObtidos" class="q-pt-none">
+    <q-card-section v-if="graficos[tipoGrafico] && dadosObtidos" class="q-pt-none  q-pa-none">
       <apexchart
         width="100%"
         :type="modeloGrafico"

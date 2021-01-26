@@ -6,7 +6,7 @@
 
     </q-card-section>
 
-    <q-card-section  class="q-pt-none">
+    <q-card-section  class="q-pt-none q-pa-none q-ma-none">
       <div :ref="divId" :id="divId"></div>
 
       <!--<Plotly  :ref="divId" :data="graficos[tipoGrafico].data" :layout="graficos[tipoGrafico].layout" ></Plotly>-->
