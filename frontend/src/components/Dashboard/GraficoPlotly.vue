@@ -60,7 +60,6 @@ export default {
         const el = this.$refs[this.divId]
         // console.log('EL')
         // console.log(el)
-        console.log(this.graficos[this.tipoGrafico].layout)
         var layout = this.graficos[this.tipoGrafico].layout
         if (this.$q.screen.lt.md) {
           layout.showlegend = false
@@ -71,6 +70,8 @@ export default {
             t: 0,
             pad: 4
           }
+          layout.yaxis = Object.assign({}, layout.yaxis, { fixedrange: true })
+          layout.xaxis = Object.assign({}, layout.xaxis, { fixedrange: true })
         }
         Plotly.newPlot(el, this.graficos[this.tipoGrafico].data, layout, { responsive: true })
       // this.key = this.key + 1
