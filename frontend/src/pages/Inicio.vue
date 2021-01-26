@@ -16,7 +16,7 @@
       </q-option-group>
 
     </transition>
-    <q-btn label="Enviar" flat  class="bg-primary text-white" align="right"  @click="enviarLinhas"/>
+    <q-btn label="Enviar" v-show="!visible" flat  class="bg-primary text-white" align="right"  @click="enviarLinhas"/>
     <q-inner-loading :showing="visible">
       <q-spinner-oval size="50px" color="primary" />
     </q-inner-loading>
