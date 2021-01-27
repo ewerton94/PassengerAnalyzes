@@ -122,8 +122,8 @@ module.exports = function (/* ctx */) {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: 'Passenger Analyszes',
-        short_name: 'Passenger Analyszes',
+        name: 'Análises de passageiros',
+        short_name: 'Análises de passageiros',
         description: 'Projeto TCC',
         display: 'standalone',
         orientation: 'portrait',

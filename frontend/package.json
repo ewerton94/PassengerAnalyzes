@@ -2,7 +2,7 @@
   "name": "passenger",
   "version": "0.0.1",
   "description": "Projeto TCC",
-  "productName": "Passenger Analyszes",
+  "productName": "Análises de Passageiros",
   "author": "Ewerton Oliveira <ewerton.amorim@live.com>",
   "private": true,
   "scripts": {
